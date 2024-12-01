@@ -3,7 +3,11 @@
     import endpoints from "../../constants/apiEndpoint";
     import { Bar } from 'react-chartjs-2';
     import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-    import { FaTachometerAlt, FaUsers, FaMoneyBillWave, FaBoxOpen, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+
+
+    import Sidebar from '../../components/Sidebar'
+    import Navbar from "../../components/Navbar";
+    import Footer from "../../components/Footer";
 
     ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -93,57 +97,13 @@
         ],
     };
 
-    // Logout Function
-    const handleLogout = () => {
-        clearAuthData();
-        navigate('/');
-    };
-
     return (
         <div className="flex min-h-screen bg-gray-100">
         {/* Sidebar */}
-        <aside className="w-64 bg-blue-800 text-white p-6 hidden lg:block">
-            <h2 className="text-2xl font-bold mb-8">Washify</h2>
-            <ul>
-    <li className="mb-6 flex items-center">
-        <FaTachometerAlt className="mr-3" /> Dashboard
-    </li>
-    <li className="mb-6 flex items-center">
-        <FaUsers className="mr-3" /> Members
-    </li>
-    <li className="mb-6 flex items-center">
-        <FaMoneyBillWave className="mr-3" /> Pendapatan
-    </li>
-    <li className="mb-6 flex items-center">
-        <FaBoxOpen className="mr-3" /> Paket
-    </li>
-    <li className="mb-6 flex items-center">
-        <button
-            className="flex items-center text-white"
-            onClick={handleLogout}
-        >
-            <FaSignOutAlt className="mr-3" /> Logout
-        </button>
-    </li>
-</ul>
-
-        </aside>
+        <Sidebar />
 
         <div className="flex-1">
-            {/* Navbar */}
-            <header className="bg-white shadow py-4 px-6 flex justify-between items-center">
-                    <h1 className="text-xl font-bold text-gray-800">Washify Dashboard</h1>
-                    <div className="flex items-center space-x-4">
-                        {/* User Info */}
-                        <div className="flex items-center space-x-2">
-                            <FaUserCircle className="text-2xl text-gray-600" />
-                            <div>
-                                <p className="text-sm font-medium text-gray-800">{user.name}</p>
-                                <p className="text-xs text-gray-500">{user.role}</p>
-                            </div>
-                        </div>
-                    </div>
-                </header>
+        <Navbar user={user} />
 
             {/* Main Content */}
             <main className="p-6">
@@ -199,9 +159,7 @@
             </main>
 
             {/* Footer */}
-            <footer className="bg-white shadow py-4 px-6 text-center">
-            <p className="text-sm text-gray-500">© 2024 Washify. All rights reserved.</p>
-            </footer>
+            <Footer />
         </div>
         </div>
     );
