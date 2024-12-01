@@ -11,6 +11,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Load token dari localStorage
     const token = localStorage.getItem("access_token");
     const lastInteraction = localStorage.getItem("last_interaction");
 
@@ -25,6 +26,14 @@ const Login = () => {
       } else {
         navigate("/dashboard");
       }
+    }
+
+    const savedUsername = localStorage.getItem("remember_username");
+    const savedPassword = localStorage.getItem("remember_password");
+    if (savedUsername && savedPassword) {
+      setUsername(savedUsername);
+      setPassword(savedPassword);
+      setRememberMe(true);
     }
   }, [navigate]);
 
@@ -65,10 +74,18 @@ const Login = () => {
       setIsLoading(false);
 
       if (data.token) {
-        if (rememberMe) {
-          localStorage.setItem("access_token", data.token);
-        }
+        // Simpan token dan waktu interaksi terakhir
+        localStorage.setItem("access_token", data.token);
         localStorage.setItem("last_interaction", new Date().getTime().toString());
+
+        if (rememberMe) {
+          localStorage.setItem("remember_username", username);
+          localStorage.setItem("remember_password", password);
+        } else {
+          localStorage.removeItem("remember_username");
+          localStorage.removeItem("remember_password");
+        }
+
         navigate("/dashboard");
       } else {
         const message = data.message || "Login gagal.";
@@ -91,7 +108,7 @@ const Login = () => {
       <div className="sm:w-full sm:max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
         <div className="flex justify-center mb-8">
           <img
-            className="h-16 w-auto"
+            className="h-20 w-auto"
             src="src/assets/images/Logo.svg"
             alt="Logo"
           />
