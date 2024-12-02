@@ -4,7 +4,6 @@
     import { Bar } from 'react-chartjs-2';
     import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 
-
     import Sidebar from '../../components/Sidebar'
     import Navbar from "../../components/Navbar";
     import Footer from "../../components/Footer";
