@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import Sidebar from "../../../components/Sidebar";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import endpoints from "../../../constants/apiEndpoint";
@@ -16,8 +15,6 @@ function CreateMembers() {
     tlp: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [user, setUser] = useState({ name: "", role: "" });
 
   const fetchWithAuth = async (url) => {
     const token = localStorage.getItem("access_token");
@@ -40,7 +37,7 @@ function CreateMembers() {
 
     try {
       const response = await fetchWithAuth(endpoints.dashboard);
-      setUser(response.data || {});
+      console.log(response);
     } catch (err) {
       console.error("Error fetching user data:", err);
     }
@@ -112,12 +109,11 @@ function CreateMembers() {
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <ToastContainer />
 
       <div className="flex flex-1 flex-col">
         {/* Navbar */}
-        <Navbar user={user} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />
+        <Navbar/>
 
         {/* Main Content */}
         <main className="flex-1 p-6">

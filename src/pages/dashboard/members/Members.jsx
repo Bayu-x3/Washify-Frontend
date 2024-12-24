@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Sidebar from "../../../components/Sidebar";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import endpoints from "../../../constants/apiEndpoint";
@@ -10,10 +9,8 @@ import { useNavigate } from "react-router-dom";
 function Members() {
   const navigate = useNavigate();
   const [members, setMembers] = useState([]);
-  const [user, setUser] = useState({ name: "", role: "" });
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const fetchWithAuth = async (url) => {
     const token = localStorage.getItem("access_token");
@@ -23,24 +20,6 @@ function Members() {
     if (!response.ok) throw new Error(`Error fetching data from ${url}`);
     return response.json();
   };
-
-  const fetchUser = useCallback(async () => {
-    const token = localStorage.getItem("access_token");
-    const lastInteraction = localStorage.getItem("last_interaction");
-
-    if (!token || !lastInteraction || new Date().getTime() - parseInt(lastInteraction, 10) > 60 * 60 * 1000) {
-      clearAuthData();
-      navigate("/");
-      return;
-    }
-
-    try {
-      const response = await fetchWithAuth(endpoints.dashboard);
-      setUser(response.data || {});
-    } catch (err) {
-      console.error("Error fetching user data:", err);
-    }
-  }, [navigate]);
 
   const clearAuthData = () => {
     localStorage.removeItem("access_token");
@@ -71,30 +50,32 @@ function Members() {
   }, [navigate]);
 
   useEffect(() => {
-    fetchUser();
     checkAuthAndFetchData();
-  }, [fetchUser, checkAuthAndFetchData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Skeleton Loader component
-  const SkeletonRow = () => (
-    <tr className="animate-pulse">
-      <td className="px-6 py-4">
-        <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-      </td>
-      <td className="px-6 py-4">
-        <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-      </td>
-      <td className="px-6 py-4">
-        <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-      </td>
-      <td className="px-6 py-4">
-        <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-      </td>
-      <td className="px-6 py-4 text-center">
-        <div className="h-4 bg-gray-300 rounded w-1/4 mx-auto"></div>
-      </td>
-    </tr>
-  );
+  function SkeletonRow() {
+    return (
+      <tr className="animate-pulse">
+        <td className="px-6 py-4">
+          <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+        </td>
+        <td className="px-6 py-4">
+          <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+        </td>
+        <td className="px-6 py-4">
+          <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+        </td>
+        <td className="px-6 py-4">
+          <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+        </td>
+        <td className="px-6 py-4 text-center">
+          <div className="h-4 bg-gray-300 rounded w-1/4 mx-auto"></div>
+        </td>
+      </tr>
+    );
+  }
 
   const handleEdit = (id) => {
     navigate(`/dashboard/members/edit/${id}`);
@@ -121,16 +102,11 @@ function Members() {
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <ToastContainer />
 
       <div className="flex flex-1 flex-col">
         {/* Navbar */}
-        <Navbar
-          user={user}
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-          isSidebarOpen={isSidebarOpen}
-        />
+        <Navbar />
 
         {/* Main Content */}
         <main className="flex-1 p-6">

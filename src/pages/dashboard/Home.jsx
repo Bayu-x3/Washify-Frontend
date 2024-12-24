@@ -4,7 +4,7 @@
     import { Bar } from 'react-chartjs-2';
     import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 
-    import Sidebar from '../../components/Sidebar'
+    // import Sidebar from '../../components/Sidebar'
     import Navbar from "../../components/Navbar";
     import Footer from "../../components/Footer";
 
@@ -98,14 +98,12 @@
 
     return (
         <div className="flex min-h-screen bg-gray-100">
-        {/* Sidebar */}
-        <Sidebar />
 
         <div className="flex-1">
-        <Navbar user={user} />
+        <Navbar user={user} />  
 
             {/* Main Content */}
-            <main className="p-6">
+            <main className="p-5">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Statistik Cards */}
                 <div className="bg-white shadow rounded-lg p-4">
