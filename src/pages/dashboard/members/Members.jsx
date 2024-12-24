@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from "../../../components/Sidebar";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
@@ -94,10 +96,33 @@ function Members() {
     </tr>
   );
 
+  const handleEdit = (id) => {
+    navigate(`/dashboard/members/edit/${id}`);
+  }
+
+  const handleDelete = async (id) => {
+    const token = localStorage.getItem('access_token');
+    try {
+      const response = await fetch(`${endpoints.members}/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (!response.ok) throw new Error('Failed to delete Member');
+
+      toast.success('Member deleted successfully');
+      setMembers((member) => member.filter((member) => member.id !== id));
+    } catch (error) {
+      console.error('Error deleting Member:', error);
+      toast.error('Failed to delete Members');
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <ToastContainer />
 
       <div className="flex flex-1 flex-col">
         {/* Navbar */}
@@ -126,9 +151,6 @@ function Members() {
                       Nama
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Alamat
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Jenis Kelamin
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -155,9 +177,6 @@ function Members() {
                       Nama
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Alamat
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Jenis Kelamin
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -175,17 +194,14 @@ function Members() {
                         {member.nama}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {member.alamat}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {member.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {member.tlp}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                        <button className="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
-                        <button className="text-red-600 hover:text-red-900">Delete</button>
+                        <button onClick={() => handleEdit(member.id)}  className="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                        <button onClick={() => handleDelete(member.id)} className="text-red-600 hover:text-red-900">Delete</button>
                       </td>
                     </tr>
                   ))}

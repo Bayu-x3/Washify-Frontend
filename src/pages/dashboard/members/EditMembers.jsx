@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
 import Sidebar from "../../../components/Sidebar";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
@@ -7,7 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function CreateMembers() {
+function EditMembers() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nama: "",
@@ -62,12 +64,12 @@ function CreateMembers() {
     }
 
     try {
-      const response = await fetchWithAuth(endpoints.members);
+      const response = await fetchWithAuth(`${endpoints.members}/${id}`);
       setFormData(response.data || []);
     } catch (err) {
       console.error("Error fetching members data:", err);
     }
-  }, [navigate]);
+  }, [id, navigate]);
 
   useEffect(() => {
     fetchUser();
@@ -83,31 +85,33 @@ function CreateMembers() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+  
     const token = localStorage.getItem("access_token");
-
+  
     try {
-      const response = await fetch(endpoints.members, {
-        method: "POST",
+      const response = await fetch(`${endpoints.members}/${id}?_method=PUT`, {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
-
+  
       if (!response.ok) {
-        toast.error("Gagal menambahkan member. Silakan coba lagi.");
+        toast.error("Gagal mengubah member, silahkan coba lagi");
+        return;
       }
-
-    toast.success("Data member berhasil ditambah!");
+  
+      toast.success("Data member berhasil diubah!");
     } catch (err) {
       console.error(err.message);
-      toast.error("Terjadi kesalahan, silakan coba lagi.");
+      toast.error("Terjadi kesalahan, silahkan coba lagi");
     } finally {
       setIsSubmitting(false);
     }
   };
+  
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -121,7 +125,7 @@ function CreateMembers() {
 
         {/* Main Content */}
         <main className="flex-1 p-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Create Member</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">Edit Member</h1>
 
           <form
             className="bg-white shadow rounded-lg p-6 max-w-3xl mx-auto"
@@ -234,4 +238,4 @@ function CreateMembers() {
   );
 }
 
-export default CreateMembers;
+export default EditMembers;
