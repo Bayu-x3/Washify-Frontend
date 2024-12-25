@@ -1,110 +1,152 @@
-import { useState, useCallback } from 'react';
+/* eslint-disable perfectionist/sort-imports */
+import type { FormEvent } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { useRouter } from 'src/routes/hooks';
-
 import { Iconify } from 'src/components/iconify';
 
-// ----------------------------------------------------------------------
+import apiEndpoint from '../../contants/apiEndpoint';
 
-export function SignInView() {
-  const router = useRouter();
+interface LoginResponse {
+  token?: string;
+  message?: string;
+}
 
-  const [showPassword, setShowPassword] = useState(false);
+export const SignInView: React.FC = () => {
+  const navigate = useNavigate();
 
-  const handleSignIn = useCallback(() => {
-    router.push('/');
-  }, [router]);
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
-  const renderForm = (
-    <Box display="flex" flexDirection="column" alignItems="flex-end">
-      <TextField
-        fullWidth
-        name="email"
-        label="Email address"
-        defaultValue="hello@gmail.com"
-        InputLabelProps={{ shrink: true }}
-        sx={{ mb: 3 }}
-      />
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
 
-      <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
-        Forgot password?
-      </Link>
+  const handleLogin = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
 
-      <TextField
-        fullWidth
-        name="password"
-        label="Password"
-        defaultValue="@demo1234"
-        InputLabelProps={{ shrink: true }}
-        type={showPassword ? 'text' : 'password'}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-        sx={{ mb: 3 }}
-      />
+    try {
+      const response = await fetch(apiEndpoint.login, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data: LoginResponse = await response.json();
 
-      <LoadingButton
-        fullWidth
-        size="large"
-        type="submit"
-        color="inherit"
-        variant="contained"
-        onClick={handleSignIn}
-      >
-        Sign in
-      </LoadingButton>
-    </Box>
-  );
+      if (response.ok && data.token) {
+        localStorage.setItem('access_token', data.token);
+        navigate('/dashboard');
+      } else {
+        setError(data.message || 'Login failed. Please try again.');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <>
-      <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
-        <Typography variant="h5">Sign in</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Don’t have an account?
-          <Link variant="subtitle2" sx={{ ml: 0.5 }}>
-            Get started
-          </Link>
-        </Typography>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        px: 2,
+        py: 4,
+      }}
+    >
+      <Box
+        gap={1.5}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        sx={{ mb: 5, textAlign: 'center' }}
+      >
+        <Typography variant="h5">Washify Sign in</Typography>
       </Box>
 
-      {renderForm}
+      <Box
+        component="form"
+        onSubmit={handleLogin}
+        display="flex"
+        flexDirection="column"
+        alignItems="flex-end"
+        sx={{
+          width: '100%',
+          maxWidth: 400,
+          mx: 'auto',
+          px: 2,
+        }}
+      >
+        {error && (
+          <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+            {error}
+          </Typography>
+        )}
 
-      <Divider sx={{ my: 3, '&::before, &::after': { borderTopStyle: 'dashed' } }}>
-        <Typography
-          variant="overline"
-          sx={{ color: 'text.secondary', fontWeight: 'fontWeightMedium' }}
+        <TextField
+          fullWidth
+          name="username"
+          label="Username"
+          value={username}
+          placeholder="Input Username"
+          onChange={(e) => setUsername(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          sx={{ mb: 3 }}
+        />
+
+        <TextField
+          fullWidth
+          name="password"
+          label="Password"
+          placeholder="Input Password"
+          type={showPassword ? 'text' : 'password'}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                  <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          sx={{ mb: 3 }}
+        />
+
+        <LoadingButton
+          fullWidth
+          size="large"
+          type="submit"
+          color="inherit"
+          variant="contained"
+          loading={isLoading}
         >
-          OR
-        </Typography>
-      </Divider>
-
-      <Box gap={1} display="flex" justifyContent="center">
-        <IconButton color="inherit">
-          <Iconify icon="logos:google-icon" />
-        </IconButton>
-        <IconButton color="inherit">
-          <Iconify icon="eva:github-fill" />
-        </IconButton>
-        <IconButton color="inherit">
-          <Iconify icon="ri:twitter-x-fill" />
-        </IconButton>
+          Sign in
+        </LoadingButton>
       </Box>
-    </>
+    </Box>
   );
-}
+};
+
+export default SignInView;
