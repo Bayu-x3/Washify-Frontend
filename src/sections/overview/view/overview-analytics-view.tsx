@@ -121,7 +121,7 @@ export function OverviewAnalyticsView() {
         {/* Status Transaksi Chart */}
         <Grid xs={12} md={6} lg={4}>
           <AnalyticsCurrentVisits
-            title="Status Transaksi"
+            title="Transactions Status"
             chart={{
               series: [
                 { label: 'Baru', value: dashboardData.ringkasan_statistik.status_transaksi.baru },
@@ -136,7 +136,7 @@ export function OverviewAnalyticsView() {
         {/* Paket Paling Banyak Dipesan */}
         <Grid xs={12} md={6} lg={4}>
           <AnalyticsCurrentVisits
-            title="Paket Paling Banyak Dipesan"
+            title="Most Ordered"
             chart={{
               series: [
                 { label: dashboardData.paket_paling_banyak.nama_paket, value: dashboardData.paket_paling_banyak.total_qty },

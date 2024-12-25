@@ -14,12 +14,22 @@ export const navData = [
     icon: icon('ic-analytics'),
   },
   {
-    title: 'User',
-    path: '/user',
+  title: 'Outlets',
+    path: '/outlets',
+    icon: icon('ic-shop'),
+  },
+  {
+    title: 'Members',
+    path: '/members',
     icon: icon('ic-user'),
   },
   {
-    title: 'Product',
+    title: 'Users',
+    path: '/users',
+    icon: icon('ic-users'),
+  },
+  {
+    title: 'Pakets',
     path: '/products',
     icon: icon('ic-cart'),
     info: (
@@ -29,18 +39,13 @@ export const navData = [
     ),
   },
   {
-    title: 'Blog',
+    title: 'Transactions',
     path: '/blog',
-    icon: icon('ic-blog'),
+    icon: icon('ic-money'),
   },
   {
-    title: 'Sign in',
-    path: '/sign-in',
-    icon: icon('ic-lock'),
-  },
-  {
-    title: 'Not found',
+    title: 'Details Transactions',
     path: '/404',
-    icon: icon('ic-disabled'),
+    icon: icon('ic-notebook'),
   },
 ];
