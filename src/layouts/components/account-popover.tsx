@@ -1,6 +1,4 @@
-import type { IconButtonProps } from '@mui/material/IconButton';
-
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -14,11 +12,11 @@ import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { useRouter, usePathname } from 'src/routes/hooks';
 
-import { _myAccount } from 'src/_mock';
+import apiEndpoint from '../../contants/apiEndpoint';
 
 // ----------------------------------------------------------------------
 
-export type AccountPopoverProps = IconButtonProps & {
+export type AccountPopoverProps = {
   data?: {
     label: string;
     href: string;
@@ -27,12 +25,12 @@ export type AccountPopoverProps = IconButtonProps & {
   }[];
 };
 
-export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
+export function AccountPopover({ data = [] }: AccountPopoverProps) {
   const router = useRouter();
-
   const pathname = usePathname();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
+  const [userData, setUserData] = useState<{ name: string; role: string } | null>(null);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
@@ -50,6 +48,66 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     [handleClosePopover, router]
   );
 
+  const handleLogout = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        console.warn('No access token found');
+        router.push('/');
+        return;
+      }
+
+      const response = await fetch(apiEndpoint.logout, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        localStorage.removeItem('access_token');
+        router.push('/');
+      } else {
+        console.error('Failed to log out:', await response.json());
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  }, [router]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          console.warn('No access token found');
+          router.push('/');
+          return;
+        }
+
+        const response = await fetch(`${apiEndpoint.dashboard}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setUserData(result.data.user);
+        } else {
+          console.error('Failed to fetch user data:', await response.json());
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [router]);
+
   return (
     <>
       <IconButton
@@ -60,12 +118,10 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           height: 40,
           background: (theme) =>
             `conic-gradient(${theme.vars.palette.primary.light}, ${theme.vars.palette.warning.light}, ${theme.vars.palette.primary.light})`,
-          ...sx,
         }}
-        {...other}
       >
-        <Avatar src={_myAccount.photoURL} alt={_myAccount.displayName} sx={{ width: 1, height: 1 }}>
-          {_myAccount.displayName.charAt(0).toUpperCase()}
+        <Avatar sx={{ width: 1, height: 1 }}>
+          {userData?.name.charAt(0).toUpperCase() || 'U'}
         </Avatar>
       </IconButton>
 
@@ -83,11 +139,11 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
       >
         <Box sx={{ p: 2, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {_myAccount?.displayName}
+            {userData?.name || 'Unknown Name'}
           </Typography>
 
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {_myAccount?.email}
+            {userData?.role || 'Unknown Role'}
           </Typography>
         </Box>
 
@@ -129,7 +185,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Box sx={{ p: 1 }}>
-          <Button fullWidth color="error" size="medium" variant="text">
+          <Button fullWidth color="error" size="medium" variant="text" onClick={handleLogout}>
             Logout
           </Button>
         </Box>
