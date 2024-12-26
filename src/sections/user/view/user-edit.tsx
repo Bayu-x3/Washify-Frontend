@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -22,8 +22,10 @@ interface Outlet {
   tlp?: string;
 }
 
-export function UserCreate() {
+export function UserEdit() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
   const [nama, setNama] = useState('');
   const [username, setUsername] = useState('');
   const [role, setRole] = useState('');
@@ -32,7 +34,7 @@ export function UserCreate() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // State untuk Snackbar (toast notifications)
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -66,33 +68,64 @@ export function UserCreate() {
       }
     };
 
+    const fetchUser = async () => {
+      try {
+        const response = await fetch(`${endpoints.users}/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+        if (response.ok && result.success) {
+          // eslint-disable-next-line @typescript-eslint/no-shadow
+          const { nama, username, role, id_outlet } = result.data;
+          setNama(nama);
+          setUsername(username);
+          setRole(role);
+          setSelectedOutlet(id_outlet);
+        } else {
+          console.error('Failed to fetch user:', result.message);
+        }
+      } catch (err) {
+        console.error('Error fetching user:', err);
+      }
+    };
+
     fetchOutlets();
-  }, [navigate]);
+    fetchUser();
+  }, [id, navigate]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
     setError('');
-
+  
     const token = localStorage.getItem('access_token');
-
+  
+    const payload = password
+      ? { nama, username, role, id_outlet: selectedOutlet, password }
+      : { nama, username, role, id_outlet: selectedOutlet };
+  
     try {
-      const response = await fetch(endpoints.users, {
-        method: 'POST',
+      const response = await fetch(`${endpoints.users}/${id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ nama, username, role, id_outlet: selectedOutlet, password }),
+        body: JSON.stringify(payload),
       });
-
+  
       const result = await response.json();
-
+  
       if (response.ok && result.success) {
-        setToastMessage('User created successfully!');
+        setToastMessage('User updated successfully!');
         setToastSeverity('success');
       } else {
-        setToastMessage(result.message || 'Failed to create user.');
+        setToastMessage(result.message || 'Failed to update user.');
         setToastSeverity('error');
       }
     } catch (err) {
@@ -103,6 +136,7 @@ export function UserCreate() {
       setIsLoading(false);
     }
   };
+  
 
   const handleCloseToast = () => {
     setToastOpen(false);
@@ -111,7 +145,6 @@ export function UserCreate() {
   return (
     <DashboardContent>
       <Box display="flex" flexDirection="column" mb={5}>
-        {/* Breadcrumbs */}
         <Breadcrumbs aria-label="breadcrumb">
           <Link color="inherit" onClick={() => navigate('/dashboard')}>
             Dashboard
@@ -119,10 +152,10 @@ export function UserCreate() {
           <Link color="inherit" onClick={() => navigate('/user')}>
             Users
           </Link>
-          <Typography color="textPrimary">Create User</Typography>
+          <Typography color="textPrimary">Edit User</Typography>
         </Breadcrumbs>
 
-        <Typography variant="h4" sx={{ mt: 2 }}>Create User</Typography>
+        <Typography variant="h4" sx={{ mt: 2 }}>Edit User</Typography>
       </Box>
 
       <Card sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
@@ -172,7 +205,6 @@ export function UserCreate() {
             value={selectedOutlet}
             onChange={(e) => setSelectedOutlet(e.target.value)}
             sx={{ mb: 3 }}
-            required
           >
             {outlets.map((outlet) => (
               <MenuItem key={outlet.id} value={outlet.id}>
@@ -180,16 +212,15 @@ export function UserCreate() {
               </MenuItem>
             ))}
           </TextField>
-
           <TextField
-            fullWidth
-            label="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            sx={{ mb: 3 }}
-            required
+           fullWidth
+           label="Password"
+           type="password"
+           value={password}
+           onChange={(e) => setPassword(e.target.value)}
+           sx={{ mb: 3 }}
+           helperText="Kosongkan jika tidak ingin mengubah password"
           />
-
           <Button
             type="submit"
             variant="contained"
@@ -197,12 +228,11 @@ export function UserCreate() {
             disabled={isLoading}
             fullWidth
           >
-            {isLoading ? 'Creating...' : 'Create User'}
+            {isLoading ? 'Updating...' : 'Update User'}
           </Button>
         </form>
       </Card>
 
-      {/* Snackbar for Toast */}
       <Snackbar open={toastOpen} autoHideDuration={6000} onClose={handleCloseToast}>
         <Alert onClose={handleCloseToast} severity={toastSeverity} sx={{ width: '100%' }}>
           {toastMessage}
@@ -212,4 +242,4 @@ export function UserCreate() {
   );
 }
 
-export default UserCreate;
+export default UserEdit;

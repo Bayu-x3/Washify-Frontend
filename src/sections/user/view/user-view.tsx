@@ -2,11 +2,13 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
@@ -101,9 +103,20 @@ export function UserView() {
 
   return (
     <DashboardContent>
+      <Box display="flex" flexDirection="column" mb={5}>
+        <Breadcrumbs aria-label="breadcrumb">
+          <Link color="inherit" onClick={() => navigate('/dashboard')}>
+            Dashboard
+          </Link>
+          <Link color="inherit" onClick={() => navigate('/user')}>
+            Users
+          </Link>
+        </Breadcrumbs>
+      </Box>
+
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Users
+          Users Management
         </Typography>
         <Button
         href='/user/create-user'

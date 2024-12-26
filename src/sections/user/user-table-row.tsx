@@ -64,7 +64,7 @@ export function UserTableRow({ row, selected, onSelectRow, onDeleteUser }: UserT
 
   const handleEdit = useCallback(() => {
     handleClosePopover();
-    navigate(`/user/edit/${row.id}`);
+    navigate(`/user/edit-user/${row.id}`);
   }, [navigate, row.id, handleClosePopover]);
 
   const handleDeleteDialogOpen = useCallback(() => {
