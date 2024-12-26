@@ -87,6 +87,10 @@ export function UserView() {
     fetchData();
   }, [navigate]);  
 
+  const handleDeleteUser = (id: string) => {
+    setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
+  };
+
   const dataFiltered: UserProps[] = applyFilter({
     inputData: users,
     comparator: getComparator(table.order, table.orderBy),
@@ -154,11 +158,12 @@ export function UserView() {
                     )
                     .map((row) => (
                       <UserTableRow
-                        key={row.id}
-                        row={row}
-                        selected={table.selected.includes(row.id)}
-                        onSelectRow={() => table.onSelectRow(row.id)}
-                      />
+                      key={row.id}
+                      row={row}
+                      selected={table.selected.includes(row.id)}
+                      onSelectRow={() => table.onSelectRow(row.id)}
+                      onDeleteUser={handleDeleteUser}
+                    />
                     ))}
 
                   <TableEmptyRows
