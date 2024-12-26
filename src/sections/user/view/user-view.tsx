@@ -102,6 +102,7 @@ export function UserView() {
           Users
         </Typography>
         <Button
+        href='/user/create-user'
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
