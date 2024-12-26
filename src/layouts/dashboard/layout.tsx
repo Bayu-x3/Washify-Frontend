@@ -51,16 +51,28 @@ if (!('webkitSpeechRecognition' in window)) {
     transcript = transcript.replace(/[.,!?]/g, '');
     console.log('Recognized:', transcript);
   
-    if (transcript === 'open page user') {
-      window.location.href = '/user';
-    } else if (transcript === 'open create user') {
-      window.location.href = '/user/create-user';
-    } else if (transcript === 'go to dashboard') {
-      window.location.href = '/dashboard';
-    } else {
-      console.warn('Command not recognized:', transcript);
+    switch (transcript) {
+      case 'open page user':
+        window.location.href = '/user';
+        break;
+      case 'open create user':
+        window.location.href = '/user/create-user';
+        break;
+      case 'go to dashboard':
+        window.location.href = '/dashboard';
+        break;
+      case 'open page outlets':
+        window.location.href = '/outlets';
+        break;
+      case 'open create outlets':
+        window.location.href = '/outlets/create-outlet';
+        break;
+      default:
+        console.warn('Command not recognized:', transcript);
+        break;
     }
   };
+  
   
   
 
