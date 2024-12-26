@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
-import Avatar from '@mui/material/Avatar';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import Popover from '@mui/material/Popover';
@@ -27,9 +26,7 @@ import { Iconify } from 'src/components/iconify';
 export type OutletProps = {
   id: string;
   nama: string;
-  username: string;
-  role: string;
-  avatarUrl: string;
+  tlp: string;
 };
 
 type OutletTableRowProps = {
@@ -48,12 +45,6 @@ export function OutletTableRow({ row, selected, onSelectRow, onDeleteUser }: Out
   const [toastMessage, setToastMessage] = useState('');
   const [toastSeverity, setToastSeverity] = useState<'success' | 'error'>('success');
 
-  const getInitials = (name: string) => {
-    const nameParts = name.split(' ');
-    const initials = nameParts.map(part => part[0].toUpperCase()).join('');
-    return initials;
-  };
-
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
   }, []);
@@ -64,7 +55,7 @@ export function OutletTableRow({ row, selected, onSelectRow, onDeleteUser }: Out
 
   const handleEdit = useCallback(() => {
     handleClosePopover();
-    navigate(`/user/edit-user/${row.id}`);
+    navigate(`/outlets/edit-outlet/${row.id}`);
   }, [navigate, row.id, handleClosePopover]);
 
   const handleDeleteDialogOpen = useCallback(() => {
@@ -86,7 +77,7 @@ export function OutletTableRow({ row, selected, onSelectRow, onDeleteUser }: Out
     }
 
     try {
-      const response = await fetch(`${endpoints.users}/${row.id}`, {
+      const response = await fetch(`${endpoints.outlets}/${row.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -95,17 +86,17 @@ export function OutletTableRow({ row, selected, onSelectRow, onDeleteUser }: Out
       });
 
       if (response.ok) {
-        setToastMessage(`User "${row.nama}" has been deleted successfully.`);
+        setToastMessage(`Outlet "${row.nama}" has been deleted successfully.`);
         setToastSeverity('success');
         onDeleteUser(row.id);
       } else {
         const result = await response.json();
-        setToastMessage(result.message || 'Failed to delete user.');
+        setToastMessage(result.message || 'Failed to delete Outlet.');
         setToastSeverity('error');
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
-      setToastMessage('An error occurred while deleting the user.');
+      console.error('Error deleting Outlet:', error);
+      setToastMessage('An error occurred while deleting the Outlet.');
       setToastSeverity('error');
     } finally {
       setToastOpen(true);
@@ -126,17 +117,12 @@ export function OutletTableRow({ row, selected, onSelectRow, onDeleteUser }: Out
 
         <TableCell component="th" scope="row">
           <Box gap={2} display="flex" alignItems="center">
-            {/* Display Avatar with initials if avatarUrl is not available */}
-            <Avatar alt={row.nama} src={row.avatarUrl || undefined}>
-              {!row.avatarUrl && getInitials(row.nama)} {/* Show initials if no avatar URL */}
-            </Avatar>
             {row.nama}
           </Box>
         </TableCell>
 
-        <TableCell>{row.username}</TableCell>
+        <TableCell>{row.tlp}</TableCell>
 
-        <TableCell>{row.role}</TableCell>
 
         <TableCell align="right">
           <IconButton onClick={handleOpenPopover}>
@@ -184,7 +170,7 @@ export function OutletTableRow({ row, selected, onSelectRow, onDeleteUser }: Out
       <Dialog open={openDeleteDialog} onClose={handleDeleteDialogClose}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete user {row.nama}?
+          Are you sure you want to delete Outlet {row.nama}?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteDialogClose} color="primary">

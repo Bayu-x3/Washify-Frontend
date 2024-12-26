@@ -66,7 +66,7 @@ export function OutletView() {
         }
   
         // Fetch users data
-        const usersResponse = await fetch(endpoints.users, {
+        const usersResponse = await fetch(endpoints.outlets, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -109,23 +109,23 @@ export function OutletView() {
           <Link color="inherit" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Link>
-          <Link color="inherit" onClick={() => navigate('/user')}>
-            Users
+          <Link color="inherit" onClick={() => navigate('/outlets')}>
+            Outlets
           </Link>
         </Breadcrumbs>
       </Box>
 
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Users Management
+          Outlets Management
         </Typography>
         <Button
-        href='/user/create-user'
+        href='/outlets/create-outlet'
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
         >
-          New user
+          New Outlet
         </Button>
       </Box>
 
@@ -158,9 +158,8 @@ export function OutletView() {
                     )
                   }
                   headLabel={[
-                    { id: 'nama', label: 'Name' },
-                    { id: 'username', label: 'Username' },
-                    { id: 'role', label: 'Role' },
+                    { id: 'nama', label: 'Outlet Name' },
+                    { id: 'tlp', label: 'Outlet Telp' },
                     { id: '' },
                   ]}
                 />

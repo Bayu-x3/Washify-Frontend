@@ -34,6 +34,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const [navOpen, setNavOpen] = useState(false);
   const layoutQuery: Breakpoint = 'lg';
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isListening, setIsListening] = useState(false);
 
   const startListening = () => {
