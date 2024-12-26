@@ -17,6 +17,9 @@ export const UserPage = lazy(() => import('src/pages/user/user'));
 export const CreateUser = lazy(() => import('src/pages/user/createUser'));
 export const EditUser = lazy(() => import('src/pages/user/editUser'));
 
+
+export const OutletPage = lazy(() => import('src/pages/outlets/outlets'));
+
 export const BlogPage = lazy(() => import('src/pages/blog'));
 
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
@@ -50,6 +53,8 @@ export function Router() {
       ),
       children: [
         { path: 'dashboard', element: <HomePage /> },
+
+        { path: 'outlets', element: <OutletPage /> },
 
         { path: 'user', element: <UserPage /> },
         { path: 'user/create-user', element: <CreateUser /> },
