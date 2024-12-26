@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -19,8 +20,6 @@ import { LayoutSection } from '../core/layout-section';
 import { HeaderSection } from '../core/header-section';
 import { AccountPopover } from '../components/account-popover';
 
-// ----------------------------------------------------------------------
-
 export type DashboardLayoutProps = {
   sx?: SxProps<Theme>;
   children: React.ReactNode;
@@ -33,14 +32,53 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const theme = useTheme();
 
   const [navOpen, setNavOpen] = useState(false);
-
   const layoutQuery: Breakpoint = 'lg';
+
+  const [isListening, setIsListening] = useState(false);
+
+  const startListening = () => {
+if (!('webkitSpeechRecognition' in window)) {
+  console.error('Browser does not support Web Speech API');
+} else {
+  const recognition = new window.webkitSpeechRecognition(); // eslint-disable-line new-cap
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onresult = (event: any) => {
+    let transcript = event.results[0][0].transcript.trim().toLowerCase();
+    transcript = transcript.replace(/[.,!?]/g, '');
+    console.log('Recognized:', transcript);
+  
+    if (transcript === 'open page user') {
+      window.location.href = '/user';
+    } else if (transcript === 'open create user') {
+      window.location.href = '/user/create-user';
+    } else if (transcript === 'go to dashboard') {
+      window.location.href = '/dashboard';
+    } else {
+      console.warn('Command not recognized:', transcript);
+    }
+  };
+  
+  
+
+  recognition.onerror = (event: any) => {
+    console.error('Speech recognition error:', event.error);
+  };
+
+  recognition.onend = () => {
+    console.log('Voice recognition stopped.');
+  };
+
+  // Mulai pengenalan suara
+  recognition.start();
+}
+
+  };
 
   return (
     <LayoutSection
-      /** **************************************
-       * Header
-       *************************************** */
       headerSection={
         <HeaderSection
           layoutQuery={layoutQuery}
@@ -77,8 +115,14 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
             rightArea: (
               <Box gap={1} display="flex" alignItems="center">
                 <Searchbar />
-                {/* <LanguagePopover data={_langs} /> */}
-                {/* <NotificationsPopover data={_notifications} /> */}
+                {/* Tombol mikrofon untuk pengenalan suara */}
+                <IconButton
+                  color={isListening ? 'primary' : 'default'}
+                  onClick={startListening}
+                  title="Start voice command"
+                >
+                  <Iconify width={24} icon="solar:microphone-bold-duotone" />
+                </IconButton>
                 <AccountPopover
                   data={[
                     {
@@ -93,19 +137,10 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           }}
         />
       }
-      /** **************************************
-       * Sidebar
-       *************************************** */
       sidebarSection={
         <NavDesktop data={navData} layoutQuery={layoutQuery} workspaces={_workspaces} />
       }
-      /** **************************************
-       * Footer
-       *************************************** */
       footerSection={null}
-      /** **************************************
-       * Style
-       *************************************** */
       cssVars={{
         '--layout-nav-vertical-width': '300px',
         '--layout-dashboard-content-pt': theme.spacing(1),
