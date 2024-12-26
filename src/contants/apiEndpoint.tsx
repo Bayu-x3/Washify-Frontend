@@ -6,6 +6,7 @@ const endpoints = {
     dashboard: `${API_BASE_URL}/dashboard`,
     members: `${API_BASE_URL}/members`,
     outlets: `${API_BASE_URL}/outlets`,
+    users: `${API_BASE_URL}/users`,
 };
 
 export default endpoints;

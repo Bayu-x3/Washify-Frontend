@@ -25,7 +25,7 @@ export const navData = [
   },
   {
     title: 'Users',
-    path: '/users',
+    path: '/user',
     icon: icon('ic-users'),
   },
   {
