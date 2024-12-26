@@ -65,12 +65,12 @@ export function OverviewAnalyticsView() {
           <AnalyticsWidgetSummary
             title="Total Outlets"
             total={dashboardData.ringkasan_statistik.jumlah_outlet}
+            percent={dashboardData.ringkasan_statistik.percent_outlet}
             icon={<img alt="icon" src="/assets/icons/glass/ic-glass-bag.svg" />}
             chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [22, 8, 35, 50, 82, 84, 77, 12],
-            }} 
-            percent={0}
+              categories: dashboardData.chart_data?.categories || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+              series: dashboardData.chart_data?.outlets || [],
+            }}
           />
         </Grid>
 
@@ -79,41 +79,42 @@ export function OverviewAnalyticsView() {
           <AnalyticsWidgetSummary
             title="Total Members"
             total={dashboardData.ringkasan_statistik.jumlah_member}
+            percent={dashboardData.ringkasan_statistik.percent_member}
             color="secondary"
             icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.svg" />}
             chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [56, 47, 40, 62, 73, 30, 23, 54],
-            }} 
-            percent={0}
+              categories: dashboardData.chart_data?.categories || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+              series: dashboardData.chart_data?.members || [],
+            }}
           />
         </Grid>
 
-        {/* Transactions */}
+        {/* Today Revenue */}
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="Today Received"
-            total={(dashboardData.ringkasan_statistik.pendapatan_hari_ini)}
+            title="Today Revenue"
+            total={dashboardData.ringkasan_statistik.pendapatan_hari_ini}
+            percent={dashboardData.ringkasan_statistik.percent_today_revenue}
             color="warning"
             icon={<img alt="icon" src="/assets/icons/glass/ic-glass-buy.svg" />}
             chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [40, 70, 50, 28, 70, 75, 7, 64],
-            }} 
-            percent={0}
+              categories: dashboardData.chart_data?.categories || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+              series: dashboardData.chart_data?.transactions || [],
+            }}
           />
         </Grid>
 
+        {/* Today Transactions */}
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title="Today Transactions"
-            percent={3.6}
             total={dashboardData.ringkasan_statistik.jumlah_transaksi_hari_ini}
+            percent={dashboardData.ringkasan_statistik.percent_today_transactions}
             color="error"
             icon={<img alt="icon" src="/assets/icons/glass/ic-glass-message.svg" />}
             chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [56, 30, 23, 54, 47, 40, 62, 73],
+              categories: dashboardData.chart_data?.categories || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+              series: dashboardData.chart_data?.todayTransactions || [],
             }}
           />
         </Grid>
