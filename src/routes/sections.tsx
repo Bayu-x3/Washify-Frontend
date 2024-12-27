@@ -22,6 +22,10 @@ export const OutletPage = lazy(() => import('src/pages/outlets/outlets'));
 export const CreateOutlet = lazy(() => import('src/pages/outlets/createOutlets'));
 export const EditOutlet = lazy(() => import('src/pages/outlets/editOutlets'));
 
+export const MembersPage = lazy(() => import('src/pages/members/members'));
+export const CreateMembers = lazy(() => import('src/pages/members/createMembers'));
+export const EditMembers = lazy(() => import('src/pages/members/editMembers'));
+
 export const BlogPage = lazy(() => import('src/pages/blog'));
 
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
@@ -59,6 +63,10 @@ export function Router() {
         { path: 'outlets', element: <OutletPage /> },
         { path: 'outlets/create-outlet', element: <CreateOutlet /> },
         { path: 'outlets/edit-outlet/:id', element: <EditOutlet /> },
+
+        { path: 'members', element: <MembersPage /> },
+        { path: 'members/create-members', element: <CreateMembers /> },
+        { path: 'members/edit-members/:id', element: <EditMembers /> },
 
         { path: 'user', element: <UserPage /> },
         { path: 'user/create-user', element: <CreateUser /> },
