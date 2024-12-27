@@ -24,9 +24,10 @@ export function MemberEdit() {
   const [nama, setNama] = useState('');
   const [alamat, setAlamat] = useState('');
   const [tlp, setTlp] = useState('');
-  const [countryCode, setCountryCode] = useState('+62'); // Default to Indonesia
+  const [jenis_kelamin, setJenisKelamin] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [countryCode, setCountryCode] = useState('+62');
 
   // State untuk Snackbar (toast notifications)
   const [toastOpen, setToastOpen] = useState(false);
@@ -42,7 +43,7 @@ export function MemberEdit() {
   
     const fetchOutlet = async () => {
       try {
-        const response = await fetch(`${endpoints.outlets}/${id}`, {
+        const response = await fetch(`${endpoints.members}/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -52,15 +53,16 @@ export function MemberEdit() {
   
         const result = await response.json();
         if (response.ok && result.success) {
-          const { nama: fetchedNama, alamat: fetchedAlamat, tlp: fetchedTlp } = result.data;
+          const { nama: fetchedNama, alamat: fetchedAlamat, tlp: fetchedTlp, jenis_kelamin: fetchedJenisKelamin } = result.data;
           setNama(fetchedNama);
           setAlamat(fetchedAlamat);
+          setJenisKelamin(fetchedJenisKelamin);
           setTlp(fetchedTlp.replace(/^\+\d{1,3}/, ''));
         } else {
-          console.error('Failed to fetch outlet:', result.message);
+          console.error('Failed to fetch member:', result.message);
         }
       } catch (err) {
-        console.error('Error fetching outlet:', err);
+        console.error('Error fetching member:', err);
       }
     };
   
@@ -76,7 +78,7 @@ export function MemberEdit() {
     const token = localStorage.getItem('access_token');
 
     try {
-      const response = await fetch(`${endpoints.outlets}/${id}`, {
+      const response = await fetch(`${endpoints.members}/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -86,16 +88,17 @@ export function MemberEdit() {
           nama,
           alamat,
           tlp: `${countryCode}${tlp}`,
+          jenis_kelamin,
         }),
       });
 
       const result = await response.json();
 
       if (response.ok && result.success) {
-        setToastMessage('Outlet updated successfully!');
+        setToastMessage('Member updated successfully!');
         setToastSeverity('success');
       } else {
-        setToastMessage(result.message || 'Failed to update Outlet.');
+        setToastMessage(result.message || 'Failed to update Member.');
         setToastSeverity('error');
       }
     } catch (err) {
@@ -126,13 +129,13 @@ export function MemberEdit() {
           <Link color="inherit" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Link>
-          <Link color="inherit" onClick={() => navigate('/outlets')}>
-            Outlets
+          <Link color="inherit" onClick={() => navigate('/members')}>
+            Members
           </Link>
-          <Typography color="textPrimary">Edit Outlet</Typography>
+          <Typography color="textPrimary">Edit Member</Typography>
         </Breadcrumbs>
 
-        <Typography variant="h4" sx={{ mt: 2 }}>Edit Outlet</Typography>
+        <Typography variant="h4" sx={{ mt: 2 }}>Edit Member</Typography>
       </Box>
 
       <Card sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
@@ -158,8 +161,24 @@ export function MemberEdit() {
             value={alamat}
             onChange={(e) => setAlamat(e.target.value)}
             sx={{ mb: 3 }}
+            multiline
+            rows={4}
             required
           />
+
+        <TextField
+            select
+            fullWidth
+            label="Gender"
+            value={jenis_kelamin}
+            onChange={(e) => setJenisKelamin(e.target.value)}
+            sx={{ mb: 3 }}
+            required
+          >
+            <MenuItem value="P">Perempuan</MenuItem>
+            <MenuItem value="L">Laki Laki</MenuItem>
+          </TextField>
+
 
           <Box display="flex" alignItems="center" gap={2} sx={{ mb: 3 }}>
             <FormControl sx={{ minWidth: 120 }}>
@@ -177,7 +196,6 @@ export function MemberEdit() {
                 ))}
               </Select>
             </FormControl>
-
             <TextField
               type="number"
               fullWidth
@@ -195,7 +213,7 @@ export function MemberEdit() {
             disabled={isLoading}
             fullWidth
           >
-            {isLoading ? 'Updating...' : 'Update Outlet'}
+            {isLoading ? 'Updating...' : 'Update Member'}
           </Button>
         </form>
       </Card>

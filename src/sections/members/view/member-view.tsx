@@ -49,7 +49,6 @@ export function MemberView() {
   
     const fetchData = async () => {
       try {
-        // Fetch dashboard data
         const dashboardResponse = await fetch(endpoints.dashboard, {
           method: 'GET',
           headers: {
@@ -65,8 +64,7 @@ export function MemberView() {
           console.error(dashboardData.message);
         }
   
-        // Fetch users data
-        const usersResponse = await fetch(endpoints.outlets, {
+        const usersResponse = await fetch(endpoints.members, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -76,7 +74,11 @@ export function MemberView() {
   
         const usersData = await usersResponse.json();
         if (usersResponse.ok && usersData.success) {
-          setUsers(usersData.data);
+          const mappedUsers = usersData.data.map((user: MemberProps) => ({
+            ...user,
+            jenis_kelamin: user.jenis_kelamin === 'P' ? 'Perempuan' : user.jenis_kelamin === 'L' ? 'Laki-Laki' : user.jenis_kelamin,
+          }));
+          setUsers(mappedUsers);
         } else {
           console.error('Failed to fetch users:', usersData.message);
         }
@@ -88,7 +90,8 @@ export function MemberView() {
     };
   
     fetchData();
-  }, [navigate]);  
+  }, [navigate]);
+  
 
   const handleDeleteUser = (id: string) => {
     setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
@@ -109,7 +112,7 @@ export function MemberView() {
           <Link color="inherit" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Link>
-          <Link color="inherit" onClick={() => navigate('/outlets')}>
+          <Link color="inherit" onClick={() => navigate('/members')}>
             Members
           </Link>
         </Breadcrumbs>
@@ -117,15 +120,15 @@ export function MemberView() {
 
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Outlets Management
+          Members Management
         </Typography>
         <Button
-        href='/outlets/create-outlet'
+        href='/members/create-member'
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
         >
-          New Outlet
+          New Members
         </Button>
       </Box>
 
@@ -158,8 +161,9 @@ export function MemberView() {
                     )
                   }
                   headLabel={[
-                    { id: 'nama', label: 'Outlet Name' },
-                    { id: 'tlp', label: 'Outlet Telp' },
+                    { id: 'nama', label: 'Members Name' },
+                    { id: 'tlp', label: 'Members Phone' },
+                    { id: 'jenis_kelamin', label: 'Members Gender' },
                     { id: '' },
                   ]}
                 />

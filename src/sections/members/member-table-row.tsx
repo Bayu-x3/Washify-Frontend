@@ -26,6 +26,7 @@ import { Iconify } from 'src/components/iconify';
 export type MemberProps = {
   id: string;
   nama: string;
+  jenis_kelamin: string;
   tlp: string;
 };
 
@@ -55,7 +56,7 @@ export function MemberTableRow({ row, selected, onSelectRow, onDeleteUser }: Mem
 
   const handleEdit = useCallback(() => {
     handleClosePopover();
-    navigate(`/outlets/edit-outlet/${row.id}`);
+    navigate(`/members/edit-member/${row.id}`);
   }, [navigate, row.id, handleClosePopover]);
 
   const handleDeleteDialogOpen = useCallback(() => {
@@ -77,7 +78,7 @@ export function MemberTableRow({ row, selected, onSelectRow, onDeleteUser }: Mem
     }
 
     try {
-      const response = await fetch(`${endpoints.outlets}/${row.id}`, {
+      const response = await fetch(`${endpoints.members}/${row.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -122,6 +123,7 @@ export function MemberTableRow({ row, selected, onSelectRow, onDeleteUser }: Mem
         </TableCell>
 
         <TableCell>{row.tlp}</TableCell>
+        <TableCell>{row.jenis_kelamin}</TableCell>
 
 
         <TableCell align="right">

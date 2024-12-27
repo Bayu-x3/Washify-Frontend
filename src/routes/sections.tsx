@@ -65,8 +65,8 @@ export function Router() {
         { path: 'outlets/edit-outlet/:id', element: <EditOutlet /> },
 
         { path: 'members', element: <MembersPage /> },
-        { path: 'members/create-members', element: <CreateMembers /> },
-        { path: 'members/edit-members/:id', element: <EditMembers /> },
+        { path: 'members/create-member', element: <CreateMembers /> },
+        { path: 'members/edit-member/:id', element: <EditMembers /> },
 
         { path: 'user', element: <UserPage /> },
         { path: 'user/create-user', element: <CreateUser /> },

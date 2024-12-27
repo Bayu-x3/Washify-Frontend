@@ -124,6 +124,8 @@ export function OutletCreate() {
             value={alamat}
             onChange={(e) => setAlamat(e.target.value)}
             sx={{ mb: 3 }}
+            multiline
+            rows={4}
             required
           />
 
