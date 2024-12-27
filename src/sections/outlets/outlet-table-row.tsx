@@ -58,6 +58,11 @@ export function OutletTableRow({ row, selected, onSelectRow, onDeleteUser }: Out
     navigate(`/outlets/edit-outlet/${row.id}`);
   }, [navigate, row.id, handleClosePopover]);
 
+  const handleShow = useCallback(() => {
+    handleClosePopover();
+    navigate(`/outlets/show-outlet/${row.id}`);
+  }, [navigate, row.id, handleClosePopover]);
+
   const handleDeleteDialogOpen = useCallback(() => {
     setOpenDeleteDialog(true);
     handleClosePopover();
@@ -157,6 +162,11 @@ export function OutletTableRow({ row, selected, onSelectRow, onDeleteUser }: Out
           <MenuItem onClick={handleEdit}>
             <Iconify icon="solar:pen-bold" />
             Edit
+          </MenuItem>
+
+          <MenuItem onClick={handleShow}>
+            <Iconify icon="icon-park-outline:eyes" />
+            Show
           </MenuItem>
 
           <MenuItem onClick={handleDeleteDialogOpen} sx={{ color: 'error.main' }}>
