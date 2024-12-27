@@ -67,6 +67,12 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           case 'open create outlets':
             window.location.href = '/outlets/create-outlet';
             break;
+          case 'open page members':
+            window.location.href = '/members';
+            break;
+          case 'open create members':
+            window.location.href = '/members/create-member';
+            break;
           default:
             console.warn('Command not recognized:', transcript);
             break;
