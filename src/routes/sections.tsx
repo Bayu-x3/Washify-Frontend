@@ -25,6 +25,7 @@ export const EditOutlet = lazy(() => import('src/pages/outlets/editOutlets'));
 export const MembersPage = lazy(() => import('src/pages/members/members'));
 export const CreateMembers = lazy(() => import('src/pages/members/createMembers'));
 export const EditMembers = lazy(() => import('src/pages/members/editMembers'));
+export const ShowMembers = lazy(() => import('src/pages/members/showMembers'));
 
 export const BlogPage = lazy(() => import('src/pages/blog'));
 
@@ -67,6 +68,7 @@ export function Router() {
         { path: 'members', element: <MembersPage /> },
         { path: 'members/create-member', element: <CreateMembers /> },
         { path: 'members/edit-member/:id', element: <EditMembers /> },
+        { path: 'members/show-member/:id', element: <ShowMembers /> },
 
         { path: 'user', element: <UserPage /> },
         { path: 'user/create-user', element: <CreateUser /> },

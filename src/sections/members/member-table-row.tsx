@@ -59,6 +59,11 @@ export function MemberTableRow({ row, selected, onSelectRow, onDeleteUser }: Mem
     navigate(`/members/edit-member/${row.id}`);
   }, [navigate, row.id, handleClosePopover]);
 
+  const handleShow = useCallback(() => {
+    handleClosePopover();
+    navigate(`/members/show-member/${row.id}`);
+  }, [navigate, row.id, handleClosePopover]);
+
   const handleDeleteDialogOpen = useCallback(() => {
     setOpenDeleteDialog(true);
     handleClosePopover();
@@ -159,6 +164,11 @@ export function MemberTableRow({ row, selected, onSelectRow, onDeleteUser }: Mem
           <MenuItem onClick={handleEdit}>
             <Iconify icon="solar:pen-bold" />
             Edit
+          </MenuItem>
+
+          <MenuItem onClick={handleShow}>
+            <Iconify icon="icon-park-outline:eyes" />
+            Show
           </MenuItem>
 
           <MenuItem onClick={handleDeleteDialogOpen} sx={{ color: 'error.main' }}>
