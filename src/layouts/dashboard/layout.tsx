@@ -1,6 +1,6 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
@@ -13,6 +13,7 @@ import { Main } from './main';
 import { layoutClasses } from '../classes';
 import { NavMobile, NavDesktop } from './nav';
 import { navData } from '../config-nav-dashboard';
+import endpoints from '../../contants/apiEndpoint';
 import { Searchbar } from '../components/searchbar';
 import { _workspaces } from '../config-nav-workspace';
 import { MenuButton } from '../components/menu-button';
@@ -33,62 +34,88 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
 
   const [navOpen, setNavOpen] = useState(false);
   const layoutQuery: Breakpoint = 'lg';
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isListening, setIsListening] = useState(false);
 
+  // Function to start voice recognition
   const startListening = () => {
-if (!('webkitSpeechRecognition' in window)) {
-  console.error('Browser does not support Web Speech API');
-} else {
-  const recognition = new window.webkitSpeechRecognition(); // eslint-disable-line new-cap
-  recognition.lang = 'en-US';
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
+    if (!('webkitSpeechRecognition' in window)) {
+      console.error('Browser does not support Web Speech API');
+    } else {
+      const recognition = new window.webkitSpeechRecognition(); // eslint-disable-line new-cap
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
 
-  recognition.onresult = (event: any) => {
-    let transcript = event.results[0][0].transcript.trim().toLowerCase();
-    transcript = transcript.replace(/[.,!?]/g, '');
-    console.log('Recognized:', transcript);
-  
-    switch (transcript) {
-      case 'open page user':
-        window.location.href = '/user';
-        break;
-      case 'open create user':
-        window.location.href = '/user/create-user';
-        break;
-      case 'go to dashboard':
-        window.location.href = '/dashboard';
-        break;
-      case 'open page outlets':
-        window.location.href = '/outlets';
-        break;
-      case 'open create outlets':
-        window.location.href = '/outlets/create-outlet';
-        break;
-      default:
-        console.warn('Command not recognized:', transcript);
-        break;
+      recognition.onresult = (event: any) => {
+        let transcript = event.results[0][0].transcript.trim().toLowerCase();
+        transcript = transcript.replace(/[.,!?]/g, '');
+        console.log('Recognized:', transcript);
+
+        switch (transcript) {
+          case 'open page user':
+            window.location.href = '/user';
+            break;
+          case 'open create user':
+            window.location.href = '/user/create-user';
+            break;
+          case 'go to dashboard':
+            window.location.href = '/dashboard';
+            break;
+          case 'open page outlets':
+            window.location.href = '/outlets';
+            break;
+          case 'open create outlets':
+            window.location.href = '/outlets/create-outlet';
+            break;
+          default:
+            console.warn('Command not recognized:', transcript);
+            break;
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+      };
+
+      recognition.onend = () => {
+        console.log('Voice recognition stopped.');
+      };
+
+      recognition.start();
     }
   };
-  
-  
-  
 
-  recognition.onerror = (event: any) => {
-    console.error('Speech recognition error:', event.error);
+  const refreshToken = async () => {
+    try {
+      const response = await fetch(endpoints.refresh, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const newToken = data.token;
+        if (newToken) {
+          localStorage.setItem('access_token', newToken);
+          console.log('Token refreshed successfully:', newToken);
+        } else {
+          console.error('No token received during refresh');
+        }
+      } else {
+        console.error('Failed to refresh token:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error during token refresh:', error);
+    }
   };
 
-  recognition.onend = () => {
-    console.log('Voice recognition stopped.');
-  };
-
-  // Mulai pengenalan suara
-  recognition.start();
-}
-
-  };
+  useEffect(() => {
+    const interval = setInterval(refreshToken, 300000); // 5 Menit
+    return () => clearInterval(interval); 
+  }, []);
 
   return (
     <LayoutSection
@@ -128,7 +155,7 @@ if (!('webkitSpeechRecognition' in window)) {
             rightArea: (
               <Box gap={1} display="flex" alignItems="center">
                 <Searchbar />
-                {/* Tombol mikrofon untuk pengenalan suara */}
+                {/* Microphone button for voice recognition */}
                 <IconButton
                   color={isListening ? 'primary' : 'default'}
                   onClick={startListening}
