@@ -9,6 +9,8 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -27,8 +29,19 @@ export const SignInView: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
 
   useEffect(() => {
+    const storedUsername = localStorage.getItem('username');
+    const storedPassword = localStorage.getItem('password');
+    const storedRememberMe = localStorage.getItem('rememberMe') === 'true';
+
+    if (storedRememberMe) {
+      setUsername(storedUsername || '');
+      setPassword(storedPassword || '');
+      setRememberMe(storedRememberMe);
+    }
+
     const token = localStorage.getItem('access_token');
     if (token) {
       navigate('/dashboard');
@@ -50,6 +63,17 @@ export const SignInView: React.FC = () => {
 
       if (response.ok && data.token) {
         localStorage.setItem('access_token', data.token);
+        
+        if (rememberMe) {
+          localStorage.setItem('username', username);
+          localStorage.setItem('password', password);
+          localStorage.setItem('rememberMe', 'true');
+        } else {
+          localStorage.removeItem('username');
+          localStorage.removeItem('password');
+          localStorage.setItem('rememberMe', 'false');
+        }
+
         navigate('/dashboard');
       } else {
         setError(data.message || 'Login failed. Please try again.');
@@ -131,6 +155,19 @@ export const SignInView: React.FC = () => {
               </InputAdornment>
             ),
           }}
+          sx={{ mb: 3 }}
+        />
+
+        {/* Remember Me Checkbox */}
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              color="primary"
+            />
+          }
+          label="Remember me"
           sx={{ mb: 3 }}
         />
 
