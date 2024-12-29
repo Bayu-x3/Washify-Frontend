@@ -51,34 +51,28 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
         let transcript = event.results[0][0].transcript.trim().toLowerCase();
         transcript = transcript.replace(/[.,!?]/g, '');
         console.log('Recognized:', transcript);
-
-        switch (transcript) {
-          case 'open page user':
-            window.location.href = '/user';
-            break;
-          case 'open create user':
-            window.location.href = '/user/create-user';
-            break;
-          case 'go to dashboard':
-            window.location.href = '/dashboard';
-            break;
-          case 'open page outlets':
-            window.location.href = '/outlets';
-            break;
-          case 'open create outlets':
-            window.location.href = '/outlets/create-outlet';
-            break;
-          case 'open page members':
-            window.location.href = '/members';
-            break;
-          case 'open create members':
-            window.location.href = '/members/create-member';
-            break;
-          default:
-            console.warn('Command not recognized:', transcript);
-            break;
+      
+        // Mapping commands to URLs
+        const commandMap: Record<string, string> = {
+          'open page user': '/user',
+          'open create user': '/user/create-user',
+          'go to dashboard': '/dashboard',
+          'open page outlets': '/outlets',
+          'open create outlets': '/outlets/create-outlet',
+          'open page members': '/members',
+          'open create members': '/members/create-member',
+          'open page pakets': '/pakets',
+          'open create pakets': '/pakets/create-paket',
+        };
+      
+        const targetUrl = commandMap[transcript];
+        if (targetUrl) {
+          window.location.href = targetUrl;
+        } else {
+          console.warn('Command not recognized:', transcript);
         }
       };
+      
 
       recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
