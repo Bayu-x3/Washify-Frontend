@@ -71,7 +71,7 @@ export function applyFilter({ inputData, comparator, filterName }: ApplyFilterPr
 
   if (filterName) {
     inputData = inputData.filter(
-      (user) => user.nama.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+      (user) => user.nama_paket.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
     );
   }
 

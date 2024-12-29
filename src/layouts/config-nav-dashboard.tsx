@@ -30,7 +30,7 @@ export const navData = [
   },
   {
     title: 'Pakets',
-    path: '/products',
+    path: '/pakets',
     icon: icon('ic-cart'),
     info: (
       <Label color="error" variant="inverted">

@@ -25,8 +25,9 @@ import { Iconify } from 'src/components/iconify';
 
 export type PaketProps = {
   id: string;
-  nama: string;
-  tlp: string;
+  nama_paket: string;
+  jenis: string;
+  harga: number;
 };
 
 type PaketTableRowProps = {
@@ -55,12 +56,12 @@ export function PaketTableRow({ row, selected, onSelectRow, onDeleteUser }: Pake
 
   const handleEdit = useCallback(() => {
     handleClosePopover();
-    navigate(`/outlets/edit-outlet/${row.id}`);
+    navigate(`/pakets/edit-paket/${row.id}`);
   }, [navigate, row.id, handleClosePopover]);
 
   const handleShow = useCallback(() => {
     handleClosePopover();
-    navigate(`/outlets/show-outlet/${row.id}`);
+    navigate(`/pakets/show-paket/${row.id}`);
   }, [navigate, row.id, handleClosePopover]);
 
   const handleDeleteDialogOpen = useCallback(() => {
@@ -82,7 +83,7 @@ export function PaketTableRow({ row, selected, onSelectRow, onDeleteUser }: Pake
     }
 
     try {
-      const response = await fetch(`${endpoints.outlets}/${row.id}`, {
+      const response = await fetch(`${endpoints.pakets}/${row.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +92,7 @@ export function PaketTableRow({ row, selected, onSelectRow, onDeleteUser }: Pake
       });
 
       if (response.ok) {
-        setToastMessage(`Paket "${row.nama}" has been deleted successfully.`);
+        setToastMessage(`Paket "${row.nama_paket}" has been deleted successfully.`);
         setToastSeverity('success');
         onDeleteUser(row.id);
       } else {
@@ -107,7 +108,7 @@ export function PaketTableRow({ row, selected, onSelectRow, onDeleteUser }: Pake
       setToastOpen(true);
       setOpenDeleteDialog(false);
     }
-  }, [row.id, row.nama, onDeleteUser]);
+  }, [row.id, row.nama_paket, onDeleteUser]);
 
   const handleCloseToast = () => {
     setToastOpen(false);
@@ -122,11 +123,13 @@ export function PaketTableRow({ row, selected, onSelectRow, onDeleteUser }: Pake
 
         <TableCell component="th" scope="row">
           <Box gap={2} display="flex" alignItems="center">
-            {row.nama}
+            {row.nama_paket}
           </Box>
         </TableCell>
 
-        <TableCell>{row.tlp}</TableCell>
+        <TableCell>{row.jenis}</TableCell>
+
+        <TableCell>{row.harga}</TableCell>
 
 
         <TableCell align="right">
@@ -180,7 +183,7 @@ export function PaketTableRow({ row, selected, onSelectRow, onDeleteUser }: Pake
       <Dialog open={openDeleteDialog} onClose={handleDeleteDialogClose}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete Paket {row.nama}?
+          Are you sure you want to delete Paket {row.nama_paket}?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteDialogClose} color="primary">

@@ -65,8 +65,7 @@ export function PaketView() {
           console.error(dashboardData.message);
         }
   
-        // Fetch users data
-        const usersResponse = await fetch(endpoints.outlets, {
+        const usersResponse = await fetch(endpoints.pakets, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -109,23 +108,23 @@ export function PaketView() {
           <Link color="inherit" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Link>
-          <Link color="inherit" onClick={() => navigate('/outlets')}>
-            Outlets
+          <Link color="inherit" onClick={() => navigate('/pakets')}>
+            Pakets
           </Link>
         </Breadcrumbs>
       </Box>
 
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Outlets Management
+          Pakets Management
         </Typography>
         <Button
-        href='/outlets/create-outlet'
+        href='/pakets/create-paket'
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
         >
-          New Outlet
+          New Paket
         </Button>
       </Box>
 
@@ -158,8 +157,9 @@ export function PaketView() {
                     )
                   }
                   headLabel={[
-                    { id: 'nama', label: 'Outlet Name' },
-                    { id: 'tlp', label: 'Outlet Telp' },
+                    { id: 'nama_paket', label: 'Paket Name' },
+                    { id: 'jenis', label: 'Paket Type' },
+                    { id: 'harga', label: 'Price' },
                     { id: '' },
                   ]}
                 />
