@@ -28,6 +28,11 @@ export const CreateMembers = lazy(() => import('src/pages/members/createMembers'
 export const EditMembers = lazy(() => import('src/pages/members/editMembers'));
 export const ShowMembers = lazy(() => import('src/pages/members/showMembers'));
 
+export const PaketsPage = lazy(() => import('src/pages/pakets/paket'));
+export const CreatePakets = lazy(() => import('src/pages/pakets/createPakets'));
+export const EditPakets = lazy(() => import('src/pages/pakets/editPakets'));
+export const ShowPakets = lazy(() => import('src/pages/pakets/showPakets'));
+
 export const BlogPage = lazy(() => import('src/pages/blog'));
 
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
@@ -76,6 +81,11 @@ export function Router() {
         { path: 'user/create-user', element: <CreateUser /> },
         { path: 'user/edit-user/:id', element: <EditUser /> },
         { path: 'user/show-user/:id', element: <ShowUser /> },
+
+        { path: 'pakets', element: <PaketsPage /> },
+        { path: 'pakets/create-paket', element: <CreatePakets /> },
+        { path: 'pakets/edit-paket/:id', element: <EditPakets /> },
+        { path: 'pakets/show-paket/:id', element: <ShowPakets /> },
 
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
