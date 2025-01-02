@@ -16,11 +16,6 @@ import { Iconify } from 'src/components/iconify';
 
 import apiEndpoint from '../../contants/apiEndpoint';
 
-interface LoginResponse {
-  token?: string;
-  message?: string;
-}
-
 export const SignInView: React.FC = () => {
   const navigate = useNavigate();
 
@@ -52,31 +47,31 @@ export const SignInView: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
+  
     try {
       const response = await fetch(apiEndpoint.login, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-      const data: LoginResponse = await response.json();
-
-      if (response.ok && data.token) {
-        localStorage.setItem('access_token', data.token);
-        
+      const data = await response.json();
+  
+      if (response.ok && data.data.token) {
+        localStorage.setItem('access_token', data.data.token);
+  
         if (rememberMe) {
-          localStorage.setItem('username', username);
-          localStorage.setItem('password', password);
+          localStorage.setItem('username', username || '');
+          localStorage.setItem('password', password || '');
           localStorage.setItem('rememberMe', 'true');
         } else {
           localStorage.removeItem('username');
           localStorage.removeItem('password');
           localStorage.setItem('rememberMe', 'false');
         }
-
+  
         navigate('/dashboard');
       } else {
-        setError(data.message || 'Login failed. Please try again.');
+        setError(data.data.message || 'Login failed. Please try again.');
       }
     } catch (err) {
       setError('An error occurred. Please try again later.');
@@ -84,6 +79,7 @@ export const SignInView: React.FC = () => {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <Box

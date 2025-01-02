@@ -30,7 +30,7 @@ export function AccountPopover({ data = [] }: AccountPopoverProps) {
   const pathname = usePathname();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
-  const [userData, setUserData] = useState<{ name: string; role: string } | null>(null);
+  const [userData, setUserData] = useState<{ nama: string; role: string } | null>(null);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
@@ -110,20 +110,21 @@ export function AccountPopover({ data = [] }: AccountPopoverProps) {
 
   return (
     <>
-      <IconButton
-        onClick={handleOpenPopover}
-        sx={{
-          p: '2px',
-          width: 40,
-          height: 40,
-          background: (theme) =>
-            `conic-gradient(${theme.vars.palette.primary.light}, ${theme.vars.palette.warning.light}, ${theme.vars.palette.primary.light})`,
-        }}
-      >
-        <Avatar sx={{ width: 1, height: 1 }}>
-          {userData?.name.charAt(0).toUpperCase() || 'U'}
-        </Avatar>
-      </IconButton>
+<IconButton
+  onClick={handleOpenPopover}
+  sx={{
+    p: '2px',
+    width: 40,
+    height: 40,
+    background: (theme) =>
+      `conic-gradient(${theme.vars.palette.primary.light}, ${theme.vars.palette.warning.light}, ${theme.vars.palette.primary.light})`,
+  }}
+>
+  <Avatar sx={{ width: 1, height: 1 }}>
+    {userData?.nama ? userData.nama.charAt(0).toUpperCase() : 'U'}
+  </Avatar>
+</IconButton>
+
 
       <Popover
         open={!!openPopover}
@@ -139,7 +140,7 @@ export function AccountPopover({ data = [] }: AccountPopoverProps) {
       >
         <Box sx={{ p: 2, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {userData?.name || 'Unknown Name'}
+            {userData?.nama || 'Unknown Name'}
           </Typography>
 
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
