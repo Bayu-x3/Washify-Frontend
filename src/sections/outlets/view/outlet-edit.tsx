@@ -85,7 +85,7 @@ export function OutletEdit() {
         body: JSON.stringify({
           nama,
           alamat,
-          tlp: `${countryCode}${tlp}`,
+          tlp,
         }),
       });
 

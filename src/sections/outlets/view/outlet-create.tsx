@@ -52,7 +52,7 @@ export function OutletCreate() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ nama, alamat, tlp: `${countryCode}${tlp}` }),
+        body: JSON.stringify({ nama, alamat, tlp }),
       });
 
       const result = await response.json();
