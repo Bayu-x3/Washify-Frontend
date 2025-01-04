@@ -6,14 +6,10 @@ import Card from '@mui/material/Card';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
-import Select from '@mui/material/Select';
 import Snackbar from '@mui/material/Snackbar';
-import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import InputLabel from '@mui/material/InputLabel';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
-import FormControl from '@mui/material/FormControl';
 
 import endpoints from 'src/contants/apiEndpoint';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -23,7 +19,6 @@ export function OutletCreate() {
   const [nama, setNama] = useState('');
   const [alamat, setAlamat] = useState('');
   const [tlp, setTlp] = useState('');
-  const [countryCode, setCountryCode] = useState('+62'); // Default to Indonesia
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -77,14 +72,6 @@ export function OutletCreate() {
     setToastOpen(false);
   };
 
-  const countries = [
-    { code: '+62', flag: '🇮🇩' },
-    { code: '+1', flag: '🇺🇸' },
-    { code: '+44', flag: '🇬🇧' },
-    { code: '+91',  flag: '🇮🇳' },
-    { code: '+81', flag: '🇯🇵' },
-  ];
-
   return (
     <DashboardContent>
       <Box display="flex" flexDirection="column" mb={5}>
@@ -129,32 +116,15 @@ export function OutletCreate() {
             required
           />
 
-          <Box display="flex" alignItems="center" gap={2} sx={{ mb: 3 }}>
-            <FormControl sx={{ minWidth: 120 }}>
-              <InputLabel id="country-code-label">Country</InputLabel>
-              <Select
-                labelId="country-code-label"
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value)}
-                label="Country"
-              >
-                {countries.map((country) => (
-                  <MenuItem key={country.code} value={country.code}>
-                    {country.flag} ({country.code})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
             <TextField
               type="number"
               fullWidth
               label="Phone"
               value={tlp}
               onChange={(e) => setTlp(e.target.value)}
+              sx={{ mb: 3 }}
               required
             />
-          </Box>
 
           <Button
             type="submit"
