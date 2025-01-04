@@ -6,14 +6,11 @@ import Card from '@mui/material/Card';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
-import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import InputLabel from '@mui/material/InputLabel';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
-import FormControl from '@mui/material/FormControl';
 
 import endpoints from 'src/contants/apiEndpoint';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -26,7 +23,6 @@ export function MemberCreate() {
   const [jenis_kelamin, setJenisKelamin] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [countryCode, setCountryCode] = useState('+62'); // Default to Indonesia
   
   // State untuk Snackbar (toast notifications)
   const [toastOpen, setToastOpen] = useState(false);
@@ -78,14 +74,6 @@ export function MemberCreate() {
   const handleCloseToast = () => {
     setToastOpen(false);
   };
-
-  const countries = [
-    { code: '+62', flag: '🇮🇩' },
-    { code: '+1', flag: '🇺🇸' },
-    { code: '+44', flag: '🇬🇧' },
-    { code: '+91',  flag: '🇮🇳' },
-    { code: '+81', flag: '🇯🇵' },
-  ];
 
   return (
     <DashboardContent>
@@ -141,36 +129,19 @@ export function MemberCreate() {
             sx={{ mb: 3 }}
             required
           >
-            <MenuItem value="P">Perempuan</MenuItem>
-            <MenuItem value="L">Laki Laki</MenuItem>
+            <MenuItem value="perempuan">Perempuan</MenuItem>
+            <MenuItem value="laki_laki">Laki Laki</MenuItem>
           </TextField>
-
-          <Box display="flex" alignItems="center" gap={2} sx={{ mb: 3 }}>
-            <FormControl sx={{ minWidth: 120 }}>
-              <InputLabel id="country-code-label">Country</InputLabel>
-              <Select
-                labelId="country-code-label"
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value)}
-                label="Country"
-              >
-                {countries.map((country) => (
-                  <MenuItem key={country.code} value={country.code}>
-                    {country.flag} ({country.code})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
 
             <TextField
               type="number"
               fullWidth
-              label="Phone"
+              label="Phone Number"
               value={tlp}
               onChange={(e) => setTlp(e.target.value)}
+              sx={{ mb: 3}}
               required
             />
-          </Box>
 
           <Button
             type="submit"

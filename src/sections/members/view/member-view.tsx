@@ -76,7 +76,7 @@ export function MemberView() {
         if (usersResponse.ok && usersData.success) {
           const mappedUsers = usersData.data.map((user: MemberProps) => ({
             ...user,
-            jenis_kelamin: user.jenis_kelamin === 'P' ? 'Perempuan' : user.jenis_kelamin === 'L' ? 'Laki-Laki' : user.jenis_kelamin,
+            jenis_kelamin: user.jenis_kelamin === 'perempuan' ? 'Perempuan' : user.jenis_kelamin === 'laki_laki' ? 'Laki-Laki' : user.jenis_kelamin,
           }));
           setUsers(mappedUsers);
         } else {

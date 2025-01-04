@@ -1,6 +1,6 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
@@ -13,7 +13,6 @@ import { Main } from './main';
 import { layoutClasses } from '../classes';
 import { NavMobile, NavDesktop } from './nav';
 import { navData } from '../config-nav-dashboard';
-import endpoints from '../../contants/apiEndpoint';
 import { Searchbar } from '../components/searchbar';
 import { _workspaces } from '../config-nav-workspace';
 import { MenuButton } from '../components/menu-button';
@@ -85,38 +84,6 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
       recognition.start();
     }
   };
-
-  const refreshToken = async () => {
-    try {
-      const response = await fetch(endpoints.refresh, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const newToken = data.token;
-        if (newToken) {
-          localStorage.setItem('access_token', newToken);
-          console.log('Token refreshed successfully:', newToken);
-        } else {
-          console.error('No token received during refresh');
-        }
-      } else {
-        console.error('Failed to refresh token:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error during token refresh:', error);
-    }
-  };
-
-  useEffect(() => {
-    const interval = setInterval(refreshToken, 300000); // 5 Menit
-    return () => clearInterval(interval); 
-  }, []);
 
   return (
     <LayoutSection
