@@ -74,8 +74,12 @@ export function PaketView() {
         });
   
         const usersData = await usersResponse.json();
-        if (usersResponse.ok && usersData.success) {
-          setUsers(usersData.data);
+          if (usersResponse.ok && usersData.success) {
+            const mappedUsers = usersData.data.map((user: PaketProps) => ({
+             ...user,
+              jenis: user.jenis === 'kiloan' ? 'Kiloan' : user.jenis === 'bed_cover' ? 'Bed Cover' : user.jenis  === 'selimut' ? 'Selimut' : user.jenis === 'lain' ? 'Lain' : user.jenis === 'kaos' ? 'Kaos' : '',
+              }));
+        setUsers(mappedUsers);
         } else {
           console.error('Failed to fetch users:', usersData.message);
         }
