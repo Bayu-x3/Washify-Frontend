@@ -40,7 +40,7 @@ export const navData = [
   },
   {
     title: 'Transactions',
-    path: '/blog',
+    path: '/trx',
     icon: icon('ic-money'),
   },
   {

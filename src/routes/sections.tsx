@@ -33,6 +33,11 @@ export const CreatePakets = lazy(() => import('src/pages/pakets/createPakets'));
 export const EditPakets = lazy(() => import('src/pages/pakets/editPakets'));
 export const ShowPakets = lazy(() => import('src/pages/pakets/showPakets'));
 
+export const TrxPage = lazy(() => import('src/pages/transactions/transactions'));
+export const CreateTrx = lazy(() => import('src/pages/transactions/createTransaction'));
+export const EditTrx = lazy(() => import('src/pages/transactions/editTransaction'));
+export const ShowTrx = lazy(() => import('src/pages/transactions/showTransaction'));
+
 export const BlogPage = lazy(() => import('src/pages/blog'));
 
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
@@ -86,6 +91,11 @@ export function Router() {
         { path: 'pakets/create-paket', element: <CreatePakets /> },
         { path: 'pakets/edit-paket/:id', element: <EditPakets /> },
         { path: 'pakets/show-paket/:id', element: <ShowPakets /> },
+
+        { path: 'trx', element: <TrxPage /> },
+        { path: 'trx/create-trx', element: <CreateTrx /> },
+        { path: 'trx/edit-trx/:id', element: <EditTrx /> },
+        { path: 'trx/show-trx/:id', element: <ShowTrx /> },
 
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
