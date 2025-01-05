@@ -137,7 +137,7 @@ export function UserShow() {
             sx={{
               width: 80,
               height: 80,
-              bgcolor: role === 'admin' ? 'blue' : 'pink',
+              bgcolor: role === 'admin' ? 'blue' : role === 'kasir' ? 'red' : 'green',
               fontSize: 32,
             }}
           >
