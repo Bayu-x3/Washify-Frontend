@@ -6,6 +6,7 @@ import Card from '@mui/material/Card';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
+import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
@@ -131,6 +132,22 @@ export function UserShow() {
       </Box>
 
       <Card sx={{ p: 4, maxWidth: 800, mx: 'auto' }}>
+      <Box display="flex" alignItems="center" gap={3} mb={4}>
+          <Avatar
+            sx={{
+              width: 80,
+              height: 80,
+              bgcolor: role === 'admin' ? 'blue' : 'pink',
+              fontSize: 32,
+            }}
+          >
+            {nama.charAt(0).toUpperCase()}
+          </Avatar>
+          <Typography variant="h5" fontWeight="bold">
+            {nama}
+          </Typography>
+        </Box>
+        
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
             <Typography variant="subtitle1" color="textSecondary">
