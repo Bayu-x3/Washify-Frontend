@@ -65,7 +65,7 @@ export function TrxView() {
         }
   
         // Fetch users data
-        const usersResponse = await fetch(endpoints.users, {
+        const usersResponse = await fetch(endpoints.trx, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ export function TrxView() {
         if (usersResponse.ok && usersData.success) {
           setUsers(usersData.data);
         } else {
-          console.error('Failed to fetch users:', usersData.message);
+          console.error('Failed to fetch Transactions:', usersData.message);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -108,23 +108,23 @@ export function TrxView() {
           <Link color="inherit" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Link>
-          <Link color="inherit" onClick={() => navigate('/user')}>
-            Users
+          <Link color="inherit" onClick={() => navigate('/trx')}>
+            Transactions
           </Link>
         </Breadcrumbs>
       </Box>
 
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Users Management
+          Trsansactions Management
         </Typography>
         <Button
-        href='/user/create-user'
+        href='/trx/create-trx'
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
         >
-          New user
+          New Transaction
         </Button>
       </Box>
 
@@ -157,9 +157,9 @@ export function TrxView() {
                     )
                   }
                   headLabel={[
-                    { id: 'nama', label: 'Name' },
-                    { id: 'username', label: 'Username' },
-                    { id: 'role', label: 'Role' },
+                    { id: 'kode_invoice', label: 'Code' },
+                    { id: 'biaya_tambahan', label: 'Additional Price' },
+                    { id: 'status', label: 'Status' },
                     { id: '' },
                   ]}
                 />

@@ -77,7 +77,7 @@ export function TrxCreate() {
     const token = localStorage.getItem('access_token');
 
     try {
-      const response = await fetch(endpoints.users, {
+      const response = await fetch(endpoints.trx, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

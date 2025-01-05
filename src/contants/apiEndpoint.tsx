@@ -9,6 +9,7 @@ const endpoints = {
     outlets: `${API_BASE_URL}/outlets`,
     users: `${API_BASE_URL}/users`,
     pakets: `${API_BASE_URL}/pakets`,
+    trx: `${API_BASE_URL}/transaksi`,
 };
 
 export default endpoints;

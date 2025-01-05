@@ -1,9 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
-import Avatar from '@mui/material/Avatar';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import Popover from '@mui/material/Popover';
@@ -26,10 +24,9 @@ import { Iconify } from 'src/components/iconify';
 
 export type TrxProps = {
   id: string;
-  nama: string;
-  username: string;
-  role: string;
-  avatarUrl: string;
+  kode_invoice: string;
+  biaya_tambahan: string;
+  status: string;
 };
 
 type TrxTableRowProps = {
@@ -48,12 +45,6 @@ export function TrxTableRow({ row, selected, onSelectRow, onDeleteUser }: TrxTab
   const [toastMessage, setToastMessage] = useState('');
   const [toastSeverity, setToastSeverity] = useState<'success' | 'error'>('success');
 
-  const getInitials = (name: string) => {
-    const nameParts = name.split(' ');
-    const initials = nameParts.map(part => part[0].toUpperCase()).join('');
-    return initials;
-  };
-
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
   }, []);
@@ -64,12 +55,12 @@ export function TrxTableRow({ row, selected, onSelectRow, onDeleteUser }: TrxTab
 
   const handleEdit = useCallback(() => {
     handleClosePopover();
-    navigate(`/user/edit-user/${row.id}`);
+    navigate(`/trx/edit-trx/${row.id}`);
   }, [navigate, row.id, handleClosePopover]);
 
   const handleShow = useCallback(() => {
     handleClosePopover();
-    navigate(`/user/show-user/${row.id}`);
+    navigate(`/trx/show-trx/${row.id}`);
   }, [navigate, row.id, handleClosePopover]);
 
   const handleDeleteDialogOpen = useCallback(() => {
@@ -100,7 +91,7 @@ export function TrxTableRow({ row, selected, onSelectRow, onDeleteUser }: TrxTab
       });
 
       if (response.ok) {
-        setToastMessage(`User "${row.nama}" has been deleted successfully.`);
+        setToastMessage(`User "${row.kode_invoice}" has been deleted successfully.`);
         setToastSeverity('success');
         onDeleteUser(row.id);
       } else {
@@ -116,7 +107,7 @@ export function TrxTableRow({ row, selected, onSelectRow, onDeleteUser }: TrxTab
       setToastOpen(true);
       setOpenDeleteDialog(false);
     }
-  }, [row.id, row.nama, onDeleteUser]);
+  }, [row.id, row.kode_invoice, onDeleteUser]);
 
   const handleCloseToast = () => {
     setToastOpen(false);
@@ -129,19 +120,11 @@ export function TrxTableRow({ row, selected, onSelectRow, onDeleteUser }: TrxTab
           <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
         </TableCell>
 
-        <TableCell component="th" scope="row">
-          <Box gap={2} display="flex" alignItems="center">
-            {/* Display Avatar with initials if avatarUrl is not available */}
-            <Avatar alt={row.nama} src={row.avatarUrl || undefined}>
-              {!row.avatarUrl && getInitials(row.nama)} {/* Show initials if no avatar URL */}
-            </Avatar>
-            {row.nama}
-          </Box>
-        </TableCell>
+        <TableCell>{row.kode_invoice}</TableCell>
 
-        <TableCell>{row.username}</TableCell>
+        <TableCell>{row.biaya_tambahan}</TableCell>
 
-        <TableCell>{row.role}</TableCell>
+        <TableCell>{row.status}</TableCell>
 
         <TableCell align="right">
           <IconButton onClick={handleOpenPopover}>
@@ -194,7 +177,7 @@ export function TrxTableRow({ row, selected, onSelectRow, onDeleteUser }: TrxTab
       <Dialog open={openDeleteDialog} onClose={handleDeleteDialogClose}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete user {row.nama}?
+          Are you sure you want to delete user {row.kode_invoice}?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteDialogClose} color="primary">
