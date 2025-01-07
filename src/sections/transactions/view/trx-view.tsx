@@ -74,17 +74,21 @@ export function TrxView() {
         });
   
         const usersData = await usersResponse.json();
-        if (usersResponse.ok && usersData.success) {
-          setUsers(usersData.data);
-        } else {
-          console.error('Failed to fetch Transactions:', usersData.message);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+                  if (usersResponse.ok && usersData.success) {
+                    const mappedUsers = usersData.data.map((user: TrxProps) => ({
+                     ...user,
+                      status: user.status === 'baru' ? 'Baru' : user.status === 'proses' ? 'Proses' : user.status  === 'selesai' ? 'Selesai' : user.status === 'diambil' ? 'Diambil' : '',
+                      }));
+                setUsers(mappedUsers);
+                } else {
+                  console.error('Failed to fetch users:', usersData.message);
+                }
+              } catch (error) {
+                console.error('Error fetching data:', error);
+              } finally {
+                setLoading(false);
+              }
+            };
   
     fetchData();
   }, [navigate]);  
