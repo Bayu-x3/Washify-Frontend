@@ -189,32 +189,30 @@ const handleSubmit = async (event: React.FormEvent) => {
               ))}
             </TextField>
 
-            {['tgl', 'batas_waktu', 'tgl_bayar'].map((field) => (
-  <TextField
-    fullWidth
-    type="date"
-    name={field}
-    value={formValues[field as keyof typeof formValues]}
-    onChange={handleChange}
-    margin="normal"
-    label={field.replace('_', ' ').toUpperCase()}
-    InputLabelProps={{ shrink: true }}
-  />
-))}
-
-{['biaya_tambahan', 'diskon', 'pajak'].map((field) => (
-  <TextField
-    fullWidth
-    type="number"
-    name={field}
-    value={formValues[field as keyof typeof formValues]}
-    onChange={handleChange}
-    margin="normal"
-    label={field.replace('_', ' ').toUpperCase()}
-  />
-))}
-
-
+            {['Tanggal Transaksi', 'batas waktu', 'tanggal bayar'].map((field) => (
+               <TextField
+               fullWidth
+               type="date"
+               name={field}
+               value={formValues[field as keyof typeof formValues]}
+               onChange={handleChange}
+               margin="normal"
+               label={field.replace('_', ' ').toUpperCase()}
+               InputLabelProps={{ shrink: true }}
+             />
+           ))}
+           
+           {['biaya_tambahan', 'diskon', 'pajak'].map((field) => (
+            <TextField
+            fullWidth
+            type="number"
+            name={field}
+            value={formValues[field as keyof typeof formValues]}
+            onChange={handleChange}
+            margin="normal"
+            label={field.replace('_', ' ').toUpperCase()}
+          />
+        ))}
             <TextField
               fullWidth
               select
@@ -248,9 +246,15 @@ const handleSubmit = async (event: React.FormEvent) => {
             </TextField>
 
             <Box mt={2}>
-              <Button variant="contained" color="primary" type="submit" disabled={isLoading}>
-                {isLoading ? 'Submitting...' : 'Submit'}
-              </Button>
+            <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={isLoading}
+            fullWidth
+          >
+            {isLoading ? 'Creating...' : 'Create Transaction'}
+          </Button>
             </Box>
           </form>
         </Card>

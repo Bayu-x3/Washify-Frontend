@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -22,23 +22,41 @@ interface Outlet {
   tlp?: string;
 }
 
+interface Member {
+  id: number;
+  nama: string;
+}
+
+interface Me {
+  id: number;
+}
+
 export function TrxEdit() {
-  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
-  const [nama, setNama] = useState('');
-  const [username, setUsername] = useState('');
-  const [role, setRole] = useState('');
+  const { id } = useParams<{ id: string }>();
+  const [me, setMe] = useState<Me | null>(null);
   const [outlets, setOutlets] = useState<Outlet[]>([]);
-  const [selectedOutlet, setSelectedOutlet] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [members, setMembers] = useState<Member[]>([]);
+  const [formValues, setFormValues] = useState({
+    kode_invoice: '',
+    id_outlet: '',
+    id_member: '',
+    tgl: '',
+    batas_waktu: '',
+    tgl_bayar: '',
+    biaya_tambahan: '',
+    diskon: '',
+    pajak: '',
+    status: '',
+    dibayar: '',
+  });
   const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error',
+  });
 
-  // State untuk Snackbar (toast notifications)
-  const [toastOpen, setToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastSeverity, setToastSeverity] = useState<'success' | 'error'>('success');
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -47,99 +65,85 @@ export function TrxEdit() {
       return;
     }
 
-    const fetchOutlets = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(endpoints.outlets, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-        const result = await response.json();
-        if (response.ok && result.success) {
-          setOutlets(result.data);
-        } else {
-          console.error('Failed to fetch outlets:', result.message);
+        const [outletResponse, memberResponse, meResponse, transactionResponse] = await Promise.all([
+          fetch(endpoints.outlets, { headers }),
+          fetch(endpoints.members, { headers }),
+          fetch(endpoints.me, { headers }),
+          fetch(`${endpoints.trx}/${id}`, { headers }),
+        ]);
+
+        const outletData = await outletResponse.json();
+        const memberData = await memberResponse.json();
+        const meData = await meResponse.json();
+        const transactionData = await transactionResponse.json();
+
+        if (outletResponse.ok && outletData.success) setOutlets(outletData.data);
+        if (memberResponse.ok && memberData.success) setMembers(memberData.data);
+        if (meResponse.ok && meData.success) setMe(meData.data);
+        if (transactionResponse.ok && transactionData.success) {
+          setFormValues({
+            ...transactionData.data,
+            tgl_bayar: transactionData.data.tgl_bayar ?? '',
+          });
         }
-      } catch (err) {
-        console.error('Error fetching outlets:', err);
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
     };
 
-    const fetchUser = async () => {
-      try {
-        const response = await fetch(`${endpoints.users}/${id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+    fetchData();
+  }, [navigate, id]);
 
-        const result = await response.json();
-        if (response.ok && result.success) {
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          const { nama, username, role, id_outlet } = result.data;
-          setNama(nama);
-          setUsername(username);
-          setRole(role);
-          setSelectedOutlet(id_outlet);
-        } else {
-          console.error('Failed to fetch user:', result.message);
-        }
-      } catch (err) {
-        console.error('Error fetching user:', err);
-      }
-    };
-
-    fetchOutlets();
-    fetchUser();
-  }, [id, navigate]);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
-    setError('');
-  
+
     const token = localStorage.getItem('access_token');
-  
-    const payload = password
-      ? { nama, username, role, id_outlet: selectedOutlet, password }
-      : { nama, username, role, id_outlet: selectedOutlet };
-  
+    if (!token) {
+      navigate('/');
+      return;
+    }
+
+    if (!me) {
+      setToast({ open: true, message: 'Failed to get user information.', severity: 'error' });
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch(`${endpoints.users}/${id}`, {
+      const response = await fetch(`${endpoints.trx}/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          ...formValues,
+          biaya_tambahan: parseFloat(formValues.biaya_tambahan),
+          diskon: parseFloat(formValues.diskon),
+          pajak: parseFloat(formValues.pajak),
+          id_user: me.id,
+        }),
       });
-  
+
       const result = await response.json();
-  
-      if (response.ok && result.success) {
-        setToastMessage('User updated successfully!');
-        setToastSeverity('success');
-      } else {
-        setToastMessage(result.message || 'Failed to update user.');
-        setToastSeverity('error');
-      }
-    } catch (err) {
-      setToastMessage('An error occurred. Please try again.');
-      setToastSeverity('error');
+      setToast({
+        open: true,
+        message: response.ok ? 'Transaction updated successfully!' : result.message || 'Failed to update transaction.',
+        severity: response.ok ? 'success' : 'error',
+      });
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      setToast({ open: true, message: 'An error occurred.', severity: 'error' });
     } finally {
-      setToastOpen(true);
       setIsLoading(false);
     }
-  };
-  
-
-  const handleCloseToast = () => {
-    setToastOpen(false);
   };
 
   return (
@@ -149,97 +153,135 @@ export function TrxEdit() {
           <Link color="inherit" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Link>
-          <Link color="inherit" onClick={() => navigate('/user')}>
-            Users
+          <Link color="inherit" onClick={() => navigate('/trx')}>
+            Transactions
           </Link>
-          <Typography color="textPrimary">Edit User</Typography>
+          <Typography color="textPrimary">Edit Transaction</Typography>
         </Breadcrumbs>
 
-        <Typography variant="h4" sx={{ mt: 2 }}>Edit User</Typography>
+        {/* Form */}
+        <Card sx={{ p: 4, mt: 2 }}>
+          <form onSubmit={handleSubmit}>
+            <Typography variant="h5" mb={2}>
+              Edit Transaction
+            </Typography>
+
+            <TextField
+              fullWidth
+              label="Kode Invoice"
+              name="kode_invoice"
+              value={formValues.kode_invoice}
+              onChange={handleChange}
+              sx={{ mb: 3 }}
+              required
+             />
+
+            <TextField
+              fullWidth
+              select
+              label="Outlet"
+              name="id_outlet"
+              value={formValues.id_outlet}
+              onChange={handleChange}
+              margin="normal"
+            >
+              {outlets.map((outlet) => (
+                <MenuItem key={outlet.id} value={outlet.id}>
+                  {outlet.nama}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <TextField
+              fullWidth
+              select
+              label="Member"
+              name="id_member"
+              value={formValues.id_member}
+              onChange={handleChange}
+              margin="normal"
+            >
+              {members.map((member) => (
+                <MenuItem key={member.id} value={member.id}>
+                  {member.nama}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            {['tgl', 'batas_waktu', 'tgl_bayar'].map((field) => (
+              <TextField
+              fullWidth
+              type="date"
+              name={field}
+              value={formValues[field as keyof typeof formValues]
+                ? formValues[field as keyof typeof formValues].slice(0, 10)
+                : ''
+              }
+              onChange={handleChange}
+              margin="normal"
+              label={field.replace('_', ' ').toUpperCase()}
+              InputLabelProps={{ shrink: true }}
+            />
+          ))}
+
+            {['biaya_tambahan', 'diskon', 'pajak'].map((field) => (
+              <TextField
+                fullWidth
+                type="number"
+                name={field}
+                value={formValues[field as keyof typeof formValues]}
+                onChange={handleChange}
+                margin="normal"
+                label={field.replace('_', ' ').toUpperCase()}
+              />
+            ))}
+            <TextField
+              fullWidth
+              select
+              label="Status"
+              name="status"
+              value={formValues.status}
+              onChange={handleChange}
+              margin="normal"
+            >
+              {['baru', 'proses', 'selesai', 'diambil'].map((status) => (
+                <MenuItem key={status} value={status}>
+                  {status}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <TextField
+              fullWidth
+              select
+              label="Paid"
+              name="dibayar"
+              value={formValues.dibayar}
+              onChange={handleChange}
+              margin="normal"
+            >
+              {['dibayar', 'belum_dibayar'].map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <Box mt={2}>
+              <Button type="submit" variant="contained" color="primary" disabled={isLoading} fullWidth>
+                {isLoading ? 'Updating...' : 'Update Transaction'}
+              </Button>
+            </Box>
+          </form>
+        </Card>
       </Box>
 
-      <Card sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
-        {error && (
-          <Typography color="error" sx={{ mb: 2 }}>
-            {error}
-          </Typography>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <TextField
-            fullWidth
-            label="Name"
-            value={nama}
-            onChange={(e) => setNama(e.target.value)}
-            sx={{ mb: 3 }}
-            required
-          />
-
-          <TextField
-            fullWidth
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            sx={{ mb: 3 }}
-            required
-          />
-
-          <TextField
-            select
-            fullWidth
-            label="Role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            sx={{ mb: 3 }}
-            required
-          >
-            <MenuItem value="owner">Owner</MenuItem>
-            <MenuItem value="admin">Admin</MenuItem>
-            <MenuItem value="kasir">Kasir</MenuItem>
-          </TextField>
-
-          <TextField
-            select
-            fullWidth
-            label="Outlet"
-            value={selectedOutlet}
-            onChange={(e) => setSelectedOutlet(e.target.value)}
-            sx={{ mb: 3 }}
-          >
-            {outlets.map((outlet) => (
-              <MenuItem key={outlet.id} value={outlet.id}>
-                {outlet.nama}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-           fullWidth
-           label="Password"
-           type="password"
-           value={password}
-           onChange={(e) => setPassword(e.target.value)}
-           sx={{ mb: 3 }}
-           helperText="Kosongkan jika tidak ingin mengubah password"
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            disabled={isLoading}
-            fullWidth
-          >
-            {isLoading ? 'Updating...' : 'Update User'}
-          </Button>
-        </form>
-      </Card>
-
-      <Snackbar open={toastOpen} autoHideDuration={6000} onClose={handleCloseToast}>
-        <Alert onClose={handleCloseToast} severity={toastSeverity} sx={{ width: '100%' }}>
-          {toastMessage}
+      {/* Snackbar for notifications */}
+      <Snackbar open={toast.open} autoHideDuration={6000} onClose={() => setToast((prev) => ({ ...prev, open: false }))}>
+        <Alert severity={toast.severity} onClose={() => setToast((prev) => ({ ...prev, open: false }))}>
+          {toast.message}
         </Alert>
       </Snackbar>
     </DashboardContent>
   );
 }
-
-export default TrxEdit;
