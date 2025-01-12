@@ -22,7 +22,7 @@ export function MeShowEdit() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // State untuk Snackbar (toast notifications)
+
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastSeverity, setToastSeverity] = useState<'success' | 'error'>('success');
@@ -68,37 +68,37 @@ export function MeShowEdit() {
     const token = localStorage.getItem('access_token');
 
     try {
-      const response = await fetch(`${endpoints.me}/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          username,
-          nama,
-        }),
-      });
+        const response = await fetch(`${endpoints.me}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                username,
+                nama,
+            }),
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (response.ok && result.success) {
-        localStorage.setItem('username', username || '');
-        localStorage.setItem('nama', nama || '');
-        setToastMessage('Profile updated successfully!');
-        setToastSeverity('success');
-      } else {
-        setToastMessage(result.message || 'Failed to update Profile.');
-        setToastSeverity('error');
-      }
+        if (response.ok && result.success) {
+            // Update token in localStorage
+            localStorage.setItem('access_token', result.token);
+            setToastMessage('Profile updated successfully!');
+            setToastSeverity('success');
+        } else {
+            setToastMessage(result.message || 'Failed to update Profile.');
+            setToastSeverity('error');
+        }
     } catch (err) {
-      setToastMessage('An error occurred. Please try again.');
-      setToastSeverity('error');
+        setToastMessage('An error occurred. Please try again.');
+        setToastSeverity('error');
     } finally {
-      setToastOpen(true);
-      setIsLoading(false);
+        setToastOpen(true);
+        setIsLoading(false);
     }
-  };
+};
 
   const handleCloseToast = () => {
     setToastOpen(false);
