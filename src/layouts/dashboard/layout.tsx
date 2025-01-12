@@ -135,7 +135,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   data={[
                     {
                       label: 'Settings',
-                      href: '#',
+                      href: '/me',
                       icon: <Iconify width={22} icon="solar:settings-bold-duotone" />,
                     },
                   ]}

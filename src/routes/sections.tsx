@@ -40,6 +40,8 @@ export const ShowTrx = lazy(() => import('src/pages/transactions/showTransaction
 
 export const BlogPage = lazy(() => import('src/pages/blog'));
 
+export const Me = lazy(() => import('src/pages/me/showEdit') )
+
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
@@ -96,6 +98,8 @@ export function Router() {
         { path: 'trx/create-trx', element: <CreateTrx /> },
         { path: 'trx/edit-trx/:id', element: <EditTrx /> },
         { path: 'trx/show-trx/:id', element: <ShowTrx /> },
+
+        { path: 'me', element: <Me /> },
 
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
