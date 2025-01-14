@@ -71,7 +71,7 @@ export function applyFilter({ inputData, comparator, filterName }: ApplyFilterPr
 
   if (filterName) {
     inputData = inputData.filter(
-      (user) => user.id_transaksi.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+      (user) => user.id_transaksi.kode_invoice.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
     );
   }
 

@@ -64,7 +64,7 @@ export function DetailsView() {
           console.error(dashboardData.message);
         }
   
-        const usersResponse = await fetch(endpoints.members, {
+        const usersResponse = await fetch(endpoints.details, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -74,10 +74,13 @@ export function DetailsView() {
   
         const usersData = await usersResponse.json();
         if (usersResponse.ok && usersData.success) {
-          const mappedUsers = usersData.data.map((user: DetailsProps) => ({
+          const mappedUsers = usersData.data.map((user: any) => ({
             ...user,
+            id_transaksi: user.transaksi,
+            id_paket: user.paket,
           }));
           setUsers(mappedUsers);
+          
         } else {
           console.error('Failed to fetch users:', usersData.message);
         }
@@ -111,23 +114,23 @@ export function DetailsView() {
           <Link color="inherit" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Link>
-          <Link color="inherit" onClick={() => navigate('/members')}>
-            Members
+          <Link color="inherit" onClick={() => navigate('/details')}>
+            Details Transactions
           </Link>
         </Breadcrumbs>
       </Box>
 
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Members Management
+          Details Transactions Management
         </Typography>
         <Button
-        href='/members/create-member'
+        href='/details/create-details'
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
         >
-          New Members
+          New Details
         </Button>
       </Box>
 
@@ -160,9 +163,9 @@ export function DetailsView() {
                     )
                   }
                   headLabel={[
-                    { id: 'nama', label: 'Members Name' },
-                    { id: 'tlp', label: 'Members Phone' },
-                    { id: 'jenis_kelamin', label: 'Members Gender' },
+                    { id: 'kode_invoice', label: 'Invoice Kode' },
+                    { id: 'jenis', label: 'Paket Types' },
+                    { id: 'qty', label: 'Totals' },
                     { id: '' },
                   ]}
                 />

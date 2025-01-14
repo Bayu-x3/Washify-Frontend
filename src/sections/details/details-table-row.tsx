@@ -25,11 +25,16 @@ import { Iconify } from 'src/components/iconify';
 
 export type DetailsProps = {
   id: string;
-  id_transaksi: string;
-  id_paket: string;
+  id_transaksi: {
+    kode_invoice: string;
+  };
+  id_paket: {
+    jenis: string;
+  };
   qty: number;
   keterangan: string;
 };
+
 
 type DetailsTableRowProps = {
   row: DetailsProps;
@@ -57,12 +62,12 @@ export function DetailsTableRow({ row, selected, onSelectRow, onDeleteUser }: De
 
   const handleEdit = useCallback(() => {
     handleClosePopover();
-    navigate(`/members/edit-member/${row.id}`);
+    navigate(`/details/edit-details/${row.id}`);
   }, [navigate, row.id, handleClosePopover]);
 
   const handleShow = useCallback(() => {
     handleClosePopover();
-    navigate(`/members/show-member/${row.id}`);
+    navigate(`/details/show-details/${row.id}`);
   }, [navigate, row.id, handleClosePopover]);
 
   const handleDeleteDialogOpen = useCallback(() => {
@@ -84,7 +89,7 @@ export function DetailsTableRow({ row, selected, onSelectRow, onDeleteUser }: De
     }
 
     try {
-      const response = await fetch(`${endpoints.members}/${row.id}`, {
+      const response = await fetch(`${endpoints.details}/${row.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -124,9 +129,12 @@ export function DetailsTableRow({ row, selected, onSelectRow, onDeleteUser }: De
 
         <TableCell component="th" scope="row">
           <Box gap={2} display="flex" alignItems="center">
-            {row.id_transaksi}
+          {row.id_transaksi?.kode_invoice || 'N/A'}
           </Box>
         </TableCell>
+
+        <TableCell>{row.id_paket.jenis}</TableCell>
+        <TableCell>{row.qty}</TableCell>
 
         <TableCell align="right">
           <IconButton onClick={handleOpenPopover}>
@@ -179,7 +187,7 @@ export function DetailsTableRow({ row, selected, onSelectRow, onDeleteUser }: De
       <Dialog open={openDeleteDialog} onClose={handleDeleteDialogClose}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete Details {row.id_transaksi}?
+          Are you sure you want to delete Details {row.id}?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteDialogClose} color="primary">

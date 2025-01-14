@@ -11,6 +11,7 @@ const endpoints = {
     users: `${API_BASE_URL}/users`,
     pakets: `${API_BASE_URL}/pakets`,
     trx: `${API_BASE_URL}/transaksi`,
+    details: `${API_BASE_URL}/details`,
 };
 
 export default endpoints;
