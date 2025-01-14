@@ -38,6 +38,11 @@ export const CreateTrx = lazy(() => import('src/pages/transactions/createTransac
 export const EditTrx = lazy(() => import('src/pages/transactions/editTransaction'));
 export const ShowTrx = lazy(() => import('src/pages/transactions/showTransaction'));
 
+export const DetailsPage = lazy(() => import('src/pages/details/details'));
+export const CreateDetails = lazy(() => import('src/pages/details/createDetails'));
+export const EditDetails = lazy(() => import('src/pages/details/editDetails'));
+export const ShowDetails = lazy(() => import('src/pages/details/showDetails'));
+
 export const BlogPage = lazy(() => import('src/pages/blog'));
 
 export const Me = lazy(() => import('src/pages/me/showEdit') )
@@ -98,6 +103,11 @@ export function Router() {
         { path: 'trx/create-trx', element: <CreateTrx /> },
         { path: 'trx/edit-trx/:id', element: <EditTrx /> },
         { path: 'trx/show-trx/:id', element: <ShowTrx /> },
+
+        { path: 'details', element: <DetailsPage /> },
+        { path: 'details/create-details', element: <CreateDetails /> },
+        { path: 'details/edit-details/:id', element: <EditDetails /> },
+        { path: 'details/show-details/:id', element: <ShowDetails /> },
 
         { path: 'me', element: <Me /> },
 

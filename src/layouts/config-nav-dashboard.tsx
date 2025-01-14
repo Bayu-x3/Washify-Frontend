@@ -45,7 +45,7 @@ export const navData = [
   },
   {
     title: 'Details Transactions',
-    path: '/404',
+    path: '/details',
     icon: icon('ic-notebook'),
   },
 ];
