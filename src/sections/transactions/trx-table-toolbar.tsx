@@ -38,7 +38,7 @@ export function TrxTableToolbar({ numSelected, filterName, onFilterName }: TrxTa
           fullWidth
           value={filterName}
           onChange={onFilterName}
-          placeholder="Search user..."
+          placeholder="Search transactions..."
           startAdornment={
             <InputAdornment position="start">
               <Iconify width={20} icon="eva:search-fill" sx={{ color: 'text.disabled' }} />

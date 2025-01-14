@@ -38,7 +38,7 @@ export function OutletTableToolbar({ numSelected, filterName, onFilterName }: Ou
           fullWidth
           value={filterName}
           onChange={onFilterName}
-          placeholder="Search user..."
+          placeholder="Search outlets..."
           startAdornment={
             <InputAdornment position="start">
               <Iconify width={20} icon="eva:search-fill" sx={{ color: 'text.disabled' }} />

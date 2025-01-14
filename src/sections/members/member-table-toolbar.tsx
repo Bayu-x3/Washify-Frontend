@@ -38,7 +38,7 @@ export function MemberTableToolbar({ numSelected, filterName, onFilterName }: Me
           fullWidth
           value={filterName}
           onChange={onFilterName}
-          placeholder="Search user..."
+          placeholder="Search members..."
           startAdornment={
             <InputAdornment position="start">
               <Iconify width={20} icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
