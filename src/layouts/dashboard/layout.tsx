@@ -1,24 +1,29 @@
+// eslint-disable-next-line perfectionist/sort-imports
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
+// eslint-disable-next-line perfectionist/sort-imports
 import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
+
+import { useRouter } from 'src/routes/hooks';
 
 import { Iconify } from 'src/components/iconify';
 
 import { Main } from './main';
 import { layoutClasses } from '../classes';
 import { NavMobile, NavDesktop } from './nav';
-import { navData } from '../config-nav-dashboard';
 import { Searchbar } from '../components/searchbar';
+import apiEndpoint from '../../contants/apiEndpoint';
 import { _workspaces } from '../config-nav-workspace';
 import { MenuButton } from '../components/menu-button';
 import { LayoutSection } from '../core/layout-section';
 import { HeaderSection } from '../core/header-section';
 import { AccountPopover } from '../components/account-popover';
+import { navData as allNavData } from '../config-nav-dashboard';
 
 export type DashboardLayoutProps = {
   sx?: SxProps<Theme>;
@@ -29,14 +34,54 @@ export type DashboardLayoutProps = {
 };
 
 export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) {
+  const router = useRouter();
   const theme = useTheme();
-
   const [navOpen, setNavOpen] = useState(false);
   const layoutQuery: Breakpoint = 'lg';
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isListening, setIsListening] = useState(false);
+  const [filteredNavData, setFilteredNavData] = useState(allNavData);
 
-  // Function to start voice recognition
+  // Fetch user role from the API
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          console.warn('No access token found');
+          router.push('/');
+          return;
+        }
+
+        const response = await fetch(`${apiEndpoint.me}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const result = await response.json();
+
+        if (result.success && result.data.role) {
+          const { role } = result.data;
+
+          const filteredData =
+            role === 'kasir'
+              ? allNavData.filter((item) => ['Members', 'Transactions'].includes(item.title))
+              : role === 'owner'
+                ? allNavData.filter((item) => ['Dashboard'].includes(item.title))
+                : allNavData;
+
+          setFilteredNavData(filteredData);
+        }
+      } catch (error) {
+        console.error('Error fetching role:', error);
+      }
+    };
+
+    fetchRole();
+  }, [router]);
+
   const startListening = () => {
     if (!('webkitSpeechRecognition' in window)) {
       console.error('Browser does not support Web Speech API');
@@ -50,8 +95,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
         let transcript = event.results[0][0].transcript.trim().toLowerCase();
         transcript = transcript.replace(/[.,!?]/g, '');
         console.log('Recognized:', transcript);
-      
-        // Mapping commands to URLs
+
         const commandMap: Record<string, string> = {
           'open page user': '/user',
           'open create user': '/user/create-user',
@@ -63,7 +107,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           'open page pakets': '/pakets',
           'open create pakets': '/pakets/create-paket',
         };
-      
+
         const targetUrl = commandMap[transcript];
         if (targetUrl) {
           window.location.href = targetUrl;
@@ -71,7 +115,6 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           console.warn('Command not recognized:', transcript);
         }
       };
-      
 
       recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
@@ -113,7 +156,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   }}
                 />
                 <NavMobile
-                  data={navData}
+                  data={filteredNavData}
                   open={navOpen}
                   onClose={() => setNavOpen(false)}
                   workspaces={_workspaces}
@@ -123,7 +166,6 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
             rightArea: (
               <Box gap={1} display="flex" alignItems="center">
                 <Searchbar />
-                {/* Microphone button for voice recognition */}
                 <IconButton
                   color={isListening ? 'primary' : 'default'}
                   onClick={startListening}
@@ -146,7 +188,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
         />
       }
       sidebarSection={
-        <NavDesktop data={navData} layoutQuery={layoutQuery} workspaces={_workspaces} />
+        <NavDesktop data={filteredNavData} layoutQuery={layoutQuery} workspaces={_workspaces} />
       }
       footerSection={null}
       cssVars={{
