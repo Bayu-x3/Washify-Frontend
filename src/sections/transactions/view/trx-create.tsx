@@ -189,7 +189,7 @@ const handleSubmit = async (event: React.FormEvent) => {
               ))}
             </TextField>
 
-            {['Tanggal Transaksi', 'batas waktu', 'tanggal bayar'].map((field) => (
+            {['tgl', 'batas_waktu', 'tgl_bayar'].map((field) => (
                <TextField
                fullWidth
                type="date"
