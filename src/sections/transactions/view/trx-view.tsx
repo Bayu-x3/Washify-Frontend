@@ -59,6 +59,13 @@ export function TrxView() {
   
         const dashboardData = await dashboardResponse.json();
         if (dashboardResponse.ok) {
+          const userRole = dashboardData.data.role;
+  
+          if (userRole !== 'admin' && userRole !== 'kasir') {
+            navigate('/dashboard');
+            return;
+          }
+  
           setDashboardData(dashboardData.data);
         } else {
           console.error(dashboardData.message);

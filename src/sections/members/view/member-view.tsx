@@ -58,11 +58,18 @@ export function MemberView() {
         });
   
         const dashboardData = await dashboardResponse.json();
-        if (dashboardResponse.ok) {
-          setDashboardData(dashboardData.data);
-        } else {
-          console.error(dashboardData.message);
+      if (dashboardResponse.ok) {
+        const userRole = dashboardData.data.role;
+
+        if (userRole !== 'admin' && userRole !== 'kasir') {
+          navigate('/');
+          return;
         }
+
+        setDashboardData(dashboardData.data);
+      } else {
+        console.error(dashboardData.message);
+      }
   
         const usersResponse = await fetch(endpoints.members, {
           method: 'GET',
