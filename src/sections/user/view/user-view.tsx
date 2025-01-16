@@ -59,17 +59,17 @@ export function UserView() {
   
         const dashboardData = await dashboardResponse.json();
         if (dashboardResponse.ok) {
-          const userRole = dashboardData.data.role;
-  
+          const userRole = dashboardData.data.user.role;
+          console.log('User Role:', userRole);
           if (userRole !== 'admin') {
             navigate('/dashboard');
             return;
           }
-  
           setDashboardData(dashboardData.data);
         } else {
           console.error(dashboardData.message);
         }
+        
   
         // Fetch users data
         const usersResponse = await fetch(endpoints.users, {

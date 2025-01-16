@@ -60,7 +60,7 @@ export function PaketView() {
   
         const dashboardData = await dashboardResponse.json();
         if (dashboardResponse.ok) {
-          const userRole = dashboardData.data.role;
+          const userRole = dashboardData.data.user.role;
   
           if (userRole !== 'admin') {
             navigate('/dashboard');
