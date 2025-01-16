@@ -12,6 +12,7 @@ import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Autocomplete from '@mui/material/Autocomplete';
 
 import endpoints from 'src/contants/apiEndpoint';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -37,7 +38,18 @@ export function TrxCreate() {
   const [me, setMe] = useState<Me | null>(null);
   const [outlets, setOutlets] = useState<Outlet[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [formValues, setFormValues] = useState({
+  const [formValues, setFormValues] = useState<{
+    id_outlet: string | number;
+    id_member: string | number; // Ubah di sini
+    tgl: string;
+    batas_waktu: string;
+    tgl_bayar: string;
+    biaya_tambahan: string;
+    diskon: string;
+    pajak: string;
+    status: string;
+    dibayar: string;
+  }>({
     id_outlet: '',
     id_member: '',
     tgl: '',
@@ -62,21 +74,21 @@ export function TrxCreate() {
       navigate('/');
       return;
     }
-  
+
     const fetchData = async () => {
       try {
         const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-  
+
         const [outletResponse, memberResponse, meResponse] = await Promise.all([
           fetch(endpoints.outlets, { headers }),
           fetch(endpoints.members, { headers }),
           fetch(endpoints.me, { headers }),
         ]);
-  
+
         const outletData = await outletResponse.json();
         const memberData = await memberResponse.json();
         const meData = await meResponse.json();
-  
+
         if (outletResponse.ok && outletData.success) setOutlets(outletData.data);
         if (memberResponse.ok && memberData.success) setMembers(memberData.data);
         if (meResponse.ok && meData.success) setMe(meData.data);
@@ -84,58 +96,63 @@ export function TrxCreate() {
         console.error('Error fetching data:', error);
       }
     };
-  
+
     fetchData();
   }, [navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormValues((prev) => ({ ...prev, [name]: value }));
+
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: name === 'id_member' ? String(value) : value,
+    }));
   };
 
-  // Pastikan `id_user` diambil dari data "me" saat handleSubmit
-const handleSubmit = async (event: React.FormEvent) => {
-  event.preventDefault();
-  setIsLoading(true);
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsLoading(true);
 
-  const token = localStorage.getItem('access_token');
-  if (!token) {
-    navigate('/');
-    return;
-  }
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      navigate('/');
+      return;
+    }
 
-  if (!me) {
-    setToast({ open: true, message: 'Failed to get user information.', severity: 'error' });
-    setIsLoading(false);
-    return;
-  }
+    if (!me) {
+      setToast({ open: true, message: 'Failed to get user information.', severity: 'error' });
+      setIsLoading(false);
+      return;
+    }
 
-  try {
-    const response = await fetch(endpoints.trx, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        ...formValues,
-        biaya_tambahan: parseFloat(formValues.biaya_tambahan),
-        diskon: parseFloat(formValues.diskon),
-        pajak: parseFloat(formValues.pajak),
-        id_user: me.id,
-      }),
-    });
+    try {
+      const response = await fetch(endpoints.trx, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          ...formValues,
+          biaya_tambahan: parseFloat(formValues.biaya_tambahan),
+          diskon: parseFloat(formValues.diskon),
+          pajak: parseFloat(formValues.pajak),
+          id_user: me.id,
+        }),
+      });
 
-    const result = await response.json();
-    setToast({
-      open: true,
-      message: response.ok ? 'Transaction created successfully!' : result.message || 'Failed to create transaction.',
-      severity: response.ok ? 'success' : 'error',
-    });
-  } catch (error) {
-    console.error('Error creating transaction:', error);
-    setToast({ open: true, message: 'An error occurred.', severity: 'error' });
-  } finally {
-    setIsLoading(false);
-  }
-};
+      const result = await response.json();
+      setToast({
+        open: true,
+        message: response.ok
+          ? 'Transaction created successfully!'
+          : result.message || 'Failed to create transaction.',
+        severity: response.ok ? 'success' : 'error',
+      });
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+      setToast({ open: true, message: 'An error occurred.', severity: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <DashboardContent>
@@ -157,62 +174,84 @@ const handleSubmit = async (event: React.FormEvent) => {
               Create Transaction
             </Typography>
 
-            <TextField
+            <Autocomplete
               fullWidth
-              select
-              label="Outlet"
-              name="id_outlet"
-              value={formValues.id_outlet}
-              onChange={handleChange}
-              margin="normal"
-            >
-              {outlets.map((outlet) => (
-                <MenuItem key={outlet.id} value={outlet.id}>
-                  {outlet.nama}
-                </MenuItem>
-              ))}
-            </TextField>
+              options={outlets}
+              getOptionLabel={(option) => option.nama}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Outlet"
+                  margin="normal"
+                  name="id_outlet"
+                  onChange={handleChange}
+                />
+              )}
+              renderOption={(props, option) => (
+                <li {...props} style={{ color: 'red' }}>
+                  {option.nama}
+                </li>
+              )}
+              onChange={(event, newValue) => {
+                setFormValues((prev) => ({
+                  ...prev,
+                  id_outlet: newValue ? newValue.id : '',
+                }));
+              }}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+            />
 
-            <TextField
+            <Autocomplete
               fullWidth
-              select
-              label="Member"
-              name="id_member"
-              value={formValues.id_member}
-              onChange={handleChange}
-              margin="normal"
-            >
-              {members.map((member) => (
-                <MenuItem key={member.id} value={member.id}>
-                  {member.nama}
-                </MenuItem>
-              ))}
-            </TextField>
+              options={members}
+              getOptionLabel={(option) => option.nama}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Member"
+                  margin="normal"
+                  name="id_member"
+                  onChange={handleChange}
+                />
+              )}
+              renderOption={(props, option) => (
+                <li {...props} style={{ color: 'red' }}>
+                  {option.nama}
+                </li>
+              )}
+              onChange={(event, newValue) => {
+                setFormValues((prev) => ({
+                  ...prev,
+                  id_member: newValue ? newValue.id : '',
+                }));
+              }}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+            />
 
             {['tgl', 'batas_waktu', 'tgl_bayar'].map((field) => (
-               <TextField
-               fullWidth
-               type="date"
-               name={field}
-               value={formValues[field as keyof typeof formValues]}
-               onChange={handleChange}
-               margin="normal"
-               label={field.replace('_', ' ').toUpperCase()}
-               InputLabelProps={{ shrink: true }}
-             />
-           ))}
-           
-           {['biaya_tambahan', 'diskon', 'pajak'].map((field) => (
-            <TextField
-            fullWidth
-            type="number"
-            name={field}
-            value={formValues[field as keyof typeof formValues]}
-            onChange={handleChange}
-            margin="normal"
-            label={field.replace('_', ' ').toUpperCase()}
-          />
-        ))}
+              <TextField
+                fullWidth
+                type="date"
+                name={field}
+                value={formValues[field as keyof typeof formValues]}
+                onChange={handleChange}
+                margin="normal"
+                label={field.replace('_', ' ').toUpperCase()}
+                InputLabelProps={{ shrink: true }}
+              />
+            ))}
+
+            {['biaya_tambahan', 'diskon', 'pajak'].map((field) => (
+              <TextField
+                fullWidth
+                type="number"
+                name={field}
+                value={formValues[field as keyof typeof formValues]}
+                onChange={handleChange}
+                margin="normal"
+                label={field.replace('_', ' ').toUpperCase()}
+              />
+            ))}
             <TextField
               fullWidth
               select
@@ -246,23 +285,30 @@ const handleSubmit = async (event: React.FormEvent) => {
             </TextField>
 
             <Box mt={2}>
-            <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            disabled={isLoading}
-            fullWidth
-          >
-            {isLoading ? 'Creating...' : 'Create Transaction'}
-          </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={isLoading}
+                fullWidth
+              >
+                {isLoading ? 'Creating...' : 'Create Transaction'}
+              </Button>
             </Box>
           </form>
         </Card>
       </Box>
 
       {/* Snackbar for notifications */}
-      <Snackbar open={toast.open} autoHideDuration={6000} onClose={() => setToast((prev) => ({ ...prev, open: false }))}>
-        <Alert severity={toast.severity} onClose={() => setToast((prev) => ({ ...prev, open: false }))}>
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={6000}
+        onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+      >
+        <Alert
+          severity={toast.severity}
+          onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+        >
           {toast.message}
         </Alert>
       </Snackbar>
