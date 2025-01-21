@@ -30,7 +30,7 @@ export function AccountPopover({ data = [] }: AccountPopoverProps) {
   const pathname = usePathname();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
-  const [userData, setUserData] = useState<{ nama: string; role: string } | null>(null);
+  const [userData, setUserData] = useState<{ name: string; role: string } | null>(null);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
@@ -121,7 +121,7 @@ export function AccountPopover({ data = [] }: AccountPopoverProps) {
   }}
 >
   <Avatar sx={{ width: 1, height: 1 }}>
-    {userData?.nama ? userData.nama.charAt(0).toUpperCase() : 'U'}
+    {userData?.name ? userData.name.charAt(0).toUpperCase() : 'U'}
   </Avatar>
 </IconButton>
 
@@ -140,7 +140,7 @@ export function AccountPopover({ data = [] }: AccountPopoverProps) {
       >
         <Box sx={{ p: 2, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {userData?.nama || 'Unknown Name'}
+            {userData?.name || 'Unknown Name'}
           </Typography>
 
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>

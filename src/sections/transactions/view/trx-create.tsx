@@ -40,7 +40,7 @@ export function TrxCreate() {
   const [members, setMembers] = useState<Member[]>([]);
   const [formValues, setFormValues] = useState<{
     id_outlet: string | number;
-    id_member: string | number; // Ubah di sini
+    id_member: string | number;
     tgl: string;
     batas_waktu: string;
     tgl_bayar: string;

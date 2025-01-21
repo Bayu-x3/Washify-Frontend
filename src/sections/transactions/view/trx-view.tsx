@@ -33,11 +33,10 @@ export function TrxView() {
   const table = useTable();
   const navigate = useNavigate();
 
-  const [users, setUsers] = useState<TrxProps[]>([]);
+  const [transactions, setTransactions] = useState<TrxProps[]>([]);
   const [filterName, setFilterName] = useState('');
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [dashboardDataa, setDashboardData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -45,10 +44,12 @@ export function TrxView() {
       navigate('/');
       return;
     }
-  
+
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
-        // Fetch dashboard data
         const dashboardResponse = await fetch(endpoints.dashboard, {
           method: 'GET',
           headers: {
@@ -56,55 +57,62 @@ export function TrxView() {
             Authorization: `Bearer ${token}`,
           },
         });
-  
+
         const dashboardData = await dashboardResponse.json();
-        if (dashboardResponse.ok) {
-          const userRole = dashboardData.data.user.role;
-          if (userRole !== 'admin' && userRole !== 'kasir') {
-            navigate('/dashboard');
-            return;
-          }
-  
-          setDashboardData(dashboardData.data);
-        } else {
-          console.error(dashboardData.message);
+        if (!dashboardResponse.ok) {
+          throw new Error(dashboardData.message || 'Failed to fetch dashboard data.');
         }
-  
-        // Fetch users data
-        const usersResponse = await fetch(endpoints.trx, {
+
+        const userRole = dashboardData.data?.user?.role;
+        if (userRole !== 'admin' && userRole !== 'kasir') {
+          navigate('/dashboard');
+          return;
+        }
+
+        const transactionsResponse = await fetch(endpoints.trx, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
         });
-  
-        const usersData = await usersResponse.json();
-                  if (usersResponse.ok && usersData.success) {
-                    const mappedUsers = usersData.data.map((user: TrxProps) => ({
-                     ...user,
-                      status: user.status === 'baru' ? 'Baru' : user.status === 'proses' ? 'Proses' : user.status  === 'selesai' ? 'Selesai' : user.status === 'diambil' ? 'Diambil' : '',
-                      }));
-                setUsers(mappedUsers);
-                } else {
-                  console.error('Failed to fetch users:', usersData.message);
-                }
-              } catch (error) {
-                console.error('Error fetching data:', error);
-              } finally {
-                setLoading(false);
-              }
-            };
-  
-    fetchData();
-  }, [navigate]);  
 
-  const handleDeleteUser = (id: string) => {
-    setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
+        const transactionsData = await transactionsResponse.json();
+        if (!transactionsResponse.ok || !transactionsData.success) {
+          throw new Error(transactionsData.message || 'Failed to fetch transactions.');
+        }
+
+        const mappedTransactions = transactionsData.data.map((transaction: TrxProps) => ({
+          ...transaction,
+          status:
+            transaction.status === 'baru'
+              ? 'Baru'
+              : transaction.status === 'proses'
+              ? 'Proses'
+              : transaction.status === 'selesai'
+              ? 'Selesai'
+              : transaction.status === 'diambil'
+              ? 'Diambil'
+              : '',
+        }));
+
+        setTransactions(mappedTransactions);
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
+
+  const handleDeleteTransaction = (id: string) => {
+    setTransactions((prev) => prev.filter((transaction) => transaction.id !== id));
   };
 
   const dataFiltered: TrxProps[] = applyFilter({
-    inputData: users,
+    inputData: transactions,
     comparator: getComparator(table.order, table.orderBy),
     filterName,
   });
@@ -118,18 +126,16 @@ export function TrxView() {
           <Link color="inherit" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Link>
-          <Link color="inherit" onClick={() => navigate('/trx')}>
-            Transactions
-          </Link>
+          <Typography color="textPrimary">Transactions</Typography>
         </Breadcrumbs>
       </Box>
 
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Trsansactions Management
+          Transactions Management
         </Typography>
         <Button
-        href='/trx/create-trx'
+          href="/trx/create-trx"
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
@@ -152,22 +158,26 @@ export function TrxView() {
           <TableContainer sx={{ overflow: 'unset' }}>
             {loading ? (
               <Typography sx={{ textAlign: 'center', padding: 3 }}>Loading...</Typography>
+            ) : error ? (
+              <Typography sx={{ textAlign: 'center', color: 'red', padding: 3 }}>
+                {error}
+              </Typography>
             ) : (
               <Table sx={{ minWidth: 800 }}>
                 <TrxTableHead
                   order={table.order}
                   orderBy={table.orderBy}
-                  rowCount={users.length}
+                  rowCount={transactions.length}
                   numSelected={table.selected.length}
                   onSort={table.onSort}
                   onSelectAllRows={(checked) =>
                     table.onSelectAllRows(
                       checked,
-                      users.map((user) => user.id)
+                      transactions.map((transaction) => transaction.id)
                     )
                   }
                   headLabel={[
-                    { id: 'kode_invoice', label: 'Code' },
+                    { id: 'kode_invoice', label: 'Invoice Code' },
                     { id: 'biaya_tambahan', label: 'Additional Price' },
                     { id: 'status', label: 'Status' },
                     { id: '' },
@@ -181,17 +191,17 @@ export function TrxView() {
                     )
                     .map((row) => (
                       <TrxTableRow
-                      key={row.id}
-                      row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
-                      onDeleteUser={handleDeleteUser}
-                    />
+                        key={row.id}
+                        row={row}
+                        selected={table.selected.includes(row.id)}
+                        onSelectRow={() => table.onSelectRow(row.id)}
+                        onDeleteUser={handleDeleteTransaction}
+                      />
                     ))}
 
                   <TableEmptyRows
                     height={68}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, users.length)}
+                    emptyRows={emptyRows(table.page, table.rowsPerPage, transactions.length)}
                   />
 
                   {notFound && <TableNoData searchQuery={filterName} />}
@@ -204,7 +214,7 @@ export function TrxView() {
         <TablePagination
           component="div"
           page={table.page}
-          count={users.length}
+          count={transactions.length}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           rowsPerPageOptions={[5, 10, 25]}
@@ -234,51 +244,42 @@ export function useTable() {
   );
 
   const onSelectAllRows = useCallback((checked: boolean, newSelecteds: string[]) => {
-    if (checked) {
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
+    setSelected(checked ? newSelecteds : []);
   }, []);
 
   const onSelectRow = useCallback(
     (inputValue: string) => {
-      const newSelected = selected.includes(inputValue)
-        ? selected.filter((value) => value !== inputValue)
-        : [...selected, inputValue];
-
-      setSelected(newSelected);
+      setSelected((prev) =>
+        prev.includes(inputValue) ? prev.filter((value) => value !== inputValue) : [...prev, inputValue]
+      );
     },
-    [selected]
+    []
   );
 
   const onResetPage = useCallback(() => {
     setPage(0);
   }, []);
 
-  const onChangePage = useCallback((event: unknown, newPage: number) => {
+  const onChangePage = useCallback((_: any, newPage: number) => {
     setPage(newPage);
   }, []);
 
-  const onChangeRowsPerPage = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setRowsPerPage(parseInt(event.target.value, 10));
-      onResetPage();
-    },
-    [onResetPage]
-  );
+  const onChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  }, []);
 
   return {
     page,
+    rowsPerPage,
     order,
-    onSort,
     orderBy,
     selected,
-    rowsPerPage,
+    onSort,
+    onSelectAllRows,
     onSelectRow,
     onResetPage,
     onChangePage,
-    onSelectAllRows,
     onChangeRowsPerPage,
   };
 }

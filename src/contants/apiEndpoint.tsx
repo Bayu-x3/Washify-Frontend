@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:3000/api';
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
 const endpoints = {
     me: `${API_BASE_URL}/me`,
     login: `${API_BASE_URL}/login`,
@@ -10,7 +10,7 @@ const endpoints = {
     outlets: `${API_BASE_URL}/outlets`,
     users: `${API_BASE_URL}/users`,
     pakets: `${API_BASE_URL}/pakets`,
-    trx: `${API_BASE_URL}/transaksi`,
+    trx: `${API_BASE_URL}/transaksis`,
     details: `${API_BASE_URL}/details`,
 };
 

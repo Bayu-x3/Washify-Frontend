@@ -49,7 +49,6 @@ export function OutletView() {
   
     const fetchData = async () => {
       try {
-        // Fetch dashboard data
         const dashboardResponse = await fetch(endpoints.dashboard, {
           method: 'GET',
           headers: {

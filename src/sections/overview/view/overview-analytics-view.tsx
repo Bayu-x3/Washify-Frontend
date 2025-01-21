@@ -11,54 +11,38 @@ import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 import { AnalyticsCurrentVisits } from '../analytics-current-visits';
 
 interface DashboardData {
-  chart_data: any;
   user: {
-    nama: string;
+    name: string;
     role: string;
   };
-  statistics: {
-    transactionsToday: number;
-    percentTransactionsToday: number;
-    revenueToday: {
-      _sum: {
-        biaya_tambahan: number;
-        diskon: string;
-        pajak: number;
-      };
+  ringkasan_statistik: {
+    jumlah_transaksi_hari_ini: number;
+    pendapatan_hari_ini: number;
+    jumlah_member: number;
+    jumlah_outlet: number;
+    percent_today_transactions: number;
+    percent_today_revenue: number;
+    percent_member: number;
+    percent_outlet: number;
+    status_transaksi: {
+      baru: number;
+      proses: number;
+      selesai: number;
+      diambil: number;
     };
-    percentRevenueToday: number;
-    totalMembers: number;
-    percentMembers: number;
-    totalOutlets: number;
-    percentOutlets: number;
   };
-  transactionStatus: {
-    _count: number;
-    status: string;
-  }[];
-  mostPopularPackage: {
-    id: number;
-    id_outlet: number;
-    jenis: string;
-    nama_paket: string;
-    harga: number;
-    created_at: string;
-    updated_at: string;
+  paket_paling_banyak: {
+    nama_paket: string | null;
+    total_qty: number;
   };
-  topMember: {
-    id: number;
-    nama: string;
-    alamat: string;
-    jenis_kelamin: string;
-    tlp: number;
-    created_at: string;
-    updated_at: string;
+  top_member: {
+    nama_member: string | null;
+    total_transaksi: number;
   };
-  notifications: {
-    pendingTransactions: number;
+  notifikasi: {
+    transaksi_belum_dibayar: number;
   };
 }
-
 
 export function OverviewAnalyticsView() {
   const navigate = useNavigate();
@@ -80,7 +64,7 @@ export function OverviewAnalyticsView() {
           });
           const data = await response.json();
           if (response.ok) {
-            setDashboardData(data.data); // Sesuaikan data dengan API
+            setDashboardData(data.data);
           } else {
             console.error(data.message);
           }
@@ -100,132 +84,111 @@ export function OverviewAnalyticsView() {
     );
   }
 
+  const { ringkasan_statistik, paket_paling_banyak, top_member, notifikasi, user } = dashboardData;
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        Hi, Welcome back {dashboardData?.user?.nama} 👋
+        Hi, Welcome back {user?.name} 👋
       </Typography>
 
       <Grid container spacing={3}>
-  {/* Total Outlets */}
-  <Grid xs={12} sm={6} md={3}>
-    <AnalyticsWidgetSummary
-      title="Total Outlets"
-      total={dashboardData.statistics.totalOutlets}
-      percent={dashboardData.statistics.percentOutlets}
-      icon={<img alt="icon" src="/assets/icons/glass/ic-glass-bag.svg" />}
-      chart={{
-        categories: dashboardData.chart_data?.categories || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        series: dashboardData.chart_data?.outlets || [],
-      }}
-    />
-  </Grid>
+        {/* Total Outlets */}
+        <Grid xs={12} sm={6} md={3}>
+          <AnalyticsWidgetSummary
+            title="Total Outlets"
+            total={ringkasan_statistik.jumlah_outlet}
+            percent={ringkasan_statistik.percent_outlet}
+            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-bag.svg" />}
+          />
+        </Grid>
 
-  {/* Total Members */}
-  <Grid xs={12} sm={6} md={3}>
-    <AnalyticsWidgetSummary
-      title="Total Members"
-      total={dashboardData.statistics.totalMembers}
-      percent={dashboardData.statistics.percentMembers}
-      color="secondary"
-      icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.svg" />}
-      chart={{
-        categories: dashboardData.chart_data?.categories || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        series: dashboardData.chart_data?.members || [],
-      }}
-    />
-  </Grid>
+        {/* Total Members */}
+        <Grid xs={12} sm={6} md={3}>
+          <AnalyticsWidgetSummary
+            title="Total Members"
+            total={ringkasan_statistik.jumlah_member}
+            percent={ringkasan_statistik.percent_member}
+            color="secondary"
+            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.svg" />}
+          />
+        </Grid>
 
-  {/* Today Revenue */}
-  <Grid xs={12} sm={6} md={3}>
-    <AnalyticsWidgetSummary
-      title="Today Revenue"
-      total={dashboardData.statistics.revenueToday._sum.biaya_tambahan +
-        parseFloat(dashboardData.statistics.revenueToday._sum.diskon) +
-        dashboardData.statistics.revenueToday._sum.pajak}  // Total pendapatan
-      percent={dashboardData.statistics.percentRevenueToday}
-      color="warning"
-      icon={<img alt="icon" src="/assets/icons/glass/ic-glass-buy.svg" />}
-      chart={{
-        categories: dashboardData.chart_data?.categories || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        series: dashboardData.chart_data?.transactions || [],
-      }}
-    />
-  </Grid>
+        {/* Total Transactions Today */}
+        <Grid xs={12} sm={6} md={3}>
+          <AnalyticsWidgetSummary
+            title="Transactions Today"
+            total={ringkasan_statistik.jumlah_transaksi_hari_ini}
+            percent={ringkasan_statistik.percent_today_transactions}
+            color="info"
+            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-buy.svg" />}
+          />
+        </Grid>
 
-  {/* Today Transactions */}
-  <Grid xs={12} sm={6} md={3}>
-    <AnalyticsWidgetSummary
-      title="Today Transactions"
-      total={dashboardData.statistics.transactionsToday}
-      percent={dashboardData.statistics.percentTransactionsToday}
-      color="error"
-      icon={<img alt="icon" src="/assets/icons/glass/ic-glass-message.svg" />}
-      chart={{
-        categories: dashboardData.chart_data?.categories || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        series: dashboardData.chart_data?.todayTransactions || [],
-      }}
-    />
-  </Grid>
+        {/* Revenue Today */}
+        <Grid xs={12} sm={6} md={3}>
+          <AnalyticsWidgetSummary
+            title="Revenue Today"
+            total={ringkasan_statistik.pendapatan_hari_ini}
+            percent={ringkasan_statistik.percent_today_revenue}
+            color="warning"
+            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-dollar.svg" />}
+          />
+        </Grid>
 
-  {/* Status Transaksi Chart */}
-  <Grid xs={12} md={6} lg={4}>
+        {/* Notifications */}
+        <Grid xs={12} md={6}>
+          <AnalyticsWidgetSummary
+            title="Pending Transactions"
+            total={notifikasi.transaksi_belum_dibayar}
+            percent={0} // Provide a default or calculated percentage
+            color="error"
+            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-alert.svg" />}
+          />
+        </Grid>
+      </Grid>
+
+      <Grid container spacing={3} sx={{ mt: 4 }}>
+        {/* Status Transaksi */}
+        <Grid xs={12} md={6}>
+          <AnalyticsCurrentVisits
+            title="Transaction Status"
+            chart={{
+              series: [
+                { label: 'New', value: ringkasan_statistik.status_transaksi.baru },
+                { label: 'In Process', value: ringkasan_statistik.status_transaksi.proses },
+                { label: 'Completed', value: ringkasan_statistik.status_transaksi.selesai },
+                { label: 'Taken', value: ringkasan_statistik.status_transaksi.diambil },
+              ],
+              colors: ['#00AB55', '#FFC107', '#1890FF', '#FF4842'],
+            }}
+          />
+        </Grid>
+      </Grid>
+
+      <Grid container spacing={3} sx={{ mt: 4 }}>
+  {/* Most Popular Package */}
+  <Grid xs={12} md={6}>
     <AnalyticsCurrentVisits
-      title="Transactions Status"
+      title="Most Popular Package"
       chart={{
-        series: [
-          { 
-            label: 'Baru', 
-            value: dashboardData.transactionStatus.find(status => status.status === 'baru')?._count || 0 
-          },
-          { 
-            label: 'Proses', 
-            value: dashboardData.transactionStatus.find(status => status.status === 'proses')?._count || 0 
-          },
-          { 
-            label: 'Selesai', 
-            value: dashboardData.transactionStatus.find(status => status.status === 'selesai')?._count || 0 
-          },
-          { 
-            label: 'Diambil', 
-            value: dashboardData.transactionStatus.find(status => status.status === 'diambil')?._count || 0 
-          },
-        ],
+        series: [{ label: paket_paling_banyak.nama_paket || 'N/A', value: paket_paling_banyak.total_qty || 0 }],
+        colors: ['#00AB55'],
       }}
     />
   </Grid>
 
-  {/* Paket Paling Banyak Dipesan */}
-  <Grid xs={12} md={6} lg={4}>
-    <AnalyticsCurrentVisits
-      title="Most Ordered"
-      chart={{
-        series: [
-          {
-            label: dashboardData.mostPopularPackage.nama_paket,
-            value: dashboardData.mostPopularPackage.harga,
-          },
-        ],
-      }}
-    />
-  </Grid>
-
-  {/* Top Member Chart */}
-  <Grid xs={12} md={6} lg={4}>
+  {/* Top Member */}
+  <Grid xs={12} md={6}>
     <AnalyticsCurrentVisits
       title="Top Member"
       chart={{
-        series: [
-          {
-            label: dashboardData.topMember.nama, // Menggunakan nama dari topMember
-            value: 1, // Tidak ada properti 'total_transaksi', jadi hanya memberikan nilai 1 sebagai placeholder
-          },
-        ],
+        series: [{ label: top_member.nama_member || 'N/A', value: top_member.total_transaksi || 0 }],
+        colors: ['#FFC107'],
       }}
     />
   </Grid>
 </Grid>
-
 
     </DashboardContent>
   );

@@ -56,8 +56,9 @@ export const SignInView: React.FC = () => {
       });
       const data = await response.json();
   
-      if (response.ok && data.data.token) {
-        localStorage.setItem('access_token', data.data.token);
+      if (response.ok && data.token) {
+        // Simpan token ke localStorage
+        localStorage.setItem('access_token', data.token);
   
         if (rememberMe) {
           localStorage.setItem('username', username || '');
@@ -71,16 +72,15 @@ export const SignInView: React.FC = () => {
   
         navigate('/dashboard');
       } else {
-        setError(data.data.message || 'Login failed. Please try again.');
+        setError(data.message || 'Login failed. Please try again.');
       }
     } catch (err) {
       setError('An error occurred. Please try again later.');
     } finally {
       setIsLoading(false);
     }
-  };
+  };  
   
-
   return (
     <Box
       sx={{
