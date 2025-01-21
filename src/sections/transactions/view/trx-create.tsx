@@ -31,7 +31,14 @@ interface Member {
 
 interface Me {
   id: number;
+  nama: string;
+  username: string;
+  id_outlet: number;
+  role: string;
+  created_at: string;
+  updated_at: string;
 }
+
 
 export function TrxCreate() {
   const navigate = useNavigate();
@@ -78,24 +85,35 @@ export function TrxCreate() {
     const fetchData = async () => {
       try {
         const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-
+    
         const [outletResponse, memberResponse, meResponse] = await Promise.all([
           fetch(endpoints.outlets, { headers }),
           fetch(endpoints.members, { headers }),
           fetch(endpoints.me, { headers }),
         ]);
-
+    
         const outletData = await outletResponse.json();
         const memberData = await memberResponse.json();
         const meData = await meResponse.json();
-
+    
         if (outletResponse.ok && outletData.success) setOutlets(outletData.data);
+        else console.error('Failed to fetch outlets.');
+    
         if (memberResponse.ok && memberData.success) setMembers(memberData.data);
-        if (meResponse.ok && meData.success) setMe(meData.data);
+        else console.error('Failed to fetch members.');
+    
+        if (meResponse.ok) {
+          setMe(meData);
+        } else {
+          console.error('Failed to fetch user information.');
+          setMe(null);
+        }
+        
       } catch (error) {
         console.error('Error fetching data:', error);
+        setMe(null);
       }
-    };
+    };    
 
     fetchData();
   }, [navigate]);
