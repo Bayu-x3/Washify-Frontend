@@ -22,7 +22,6 @@ export function MeShowEdit() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastSeverity, setToastSeverity] = useState<'success' | 'error'>('success');
@@ -33,7 +32,7 @@ export function MeShowEdit() {
       navigate('/');
       return;
     }
-  
+
     const fetchProfile = async () => {
       try {
         const response = await fetch(`${endpoints.me}`, {
@@ -43,10 +42,9 @@ export function MeShowEdit() {
             Authorization: `Bearer ${token}`,
           },
         });
-  
         const result = await response.json();
-        if (response.ok && result.success) {
-          const { username: fetchedUsername, nama: fetchedNama } = result.data;
+        if (response.ok) {
+          const { username: fetchedUsername, nama: fetchedNama } = result;
           setUsername(fetchedUsername);
           setNama(fetchedNama);
         } else {
@@ -56,10 +54,10 @@ export function MeShowEdit() {
         console.error('Error fetching profile:', err);
       }
     };
-  
+
     fetchProfile();
   }, [id, navigate]);
-  
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
@@ -68,37 +66,37 @@ export function MeShowEdit() {
     const token = localStorage.getItem('access_token');
 
     try {
-        const response = await fetch(`${endpoints.me}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                username,
-                nama,
-            }),
-        });
+      const response = await fetch(`${endpoints.me}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          username,
+          nama,
+        }),
+      });
 
-        const result = await response.json();
+      const result = await response.json();
 
-        if (response.ok && result.success) {
-            // Update token in localStorage
-            localStorage.setItem('access_token', result.token);
-            setToastMessage('Profile updated successfully!');
-            setToastSeverity('success');
-        } else {
-            setToastMessage(result.message || 'Failed to update Profile.');
-            setToastSeverity('error');
-        }
-    } catch (err) {
-        setToastMessage('An error occurred. Please try again.');
+      if (response.ok && result.success) {
+        setToastMessage('Profile updated successfully!');
+        setToastSeverity('success');
+        setUsername(result.user.username);
+        setNama(result.user.nama);
+      } else {
+        setToastMessage(result.message || 'Failed to update profile.');
         setToastSeverity('error');
+      }
+    } catch (err) {
+      setToastMessage('An error occurred. Please try again.');
+      setToastSeverity('error');
     } finally {
-        setToastOpen(true);
-        setIsLoading(false);
+      setToastOpen(true);
+      setIsLoading(false);
     }
-};
+  };
 
   const handleCloseToast = () => {
     setToastOpen(false);
@@ -116,7 +114,9 @@ export function MeShowEdit() {
           </Link>
         </Breadcrumbs>
 
-        <Typography variant="h4" sx={{ mt: 2 }}>Profile</Typography>
+        <Typography variant="h4" sx={{ mt: 2 }}>
+          Profile
+        </Typography>
       </Box>
 
       <Card sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
@@ -127,15 +127,16 @@ export function MeShowEdit() {
         )}
 
         <form onSubmit={handleSubmit}>
-        <TextField
+          <TextField
             fullWidth
             label="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             sx={{ mb: 3 }}
             required
+            inputProps={{ maxLength: 255 }}
+            helperText="Username must be unique and max 255 characters."
           />
-
           <TextField
             fullWidth
             label="Name"
@@ -143,14 +144,11 @@ export function MeShowEdit() {
             onChange={(e) => setNama(e.target.value)}
             sx={{ mb: 3 }}
             required
+            inputProps={{ maxLength: 255 }}
+            helperText="Name must be max 255 characters."
           />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            disabled={isLoading}
-            fullWidth
-          >
+
+          <Button type="submit" variant="contained" color="primary" disabled={isLoading} fullWidth>
             {isLoading ? 'Updating...' : 'Update Profile'}
           </Button>
         </form>
