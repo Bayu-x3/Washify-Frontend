@@ -19,6 +19,8 @@ export function MeShowEdit() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [nama, setNama] = useState('');
+  const [idOutlet, setIdOutlet] = useState('');
+  const [outletName, setOutletName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +34,7 @@ export function MeShowEdit() {
       navigate('/');
       return;
     }
-
+  
     const fetchProfile = async () => {
       try {
         const response = await fetch(`${endpoints.me}`, {
@@ -44,9 +46,24 @@ export function MeShowEdit() {
         });
         const result = await response.json();
         if (response.ok) {
-          const { username: fetchedUsername, nama: fetchedNama } = result;
+          const { username: fetchedUsername, nama: fetchedNama, id_outlet: fetchedIdOutlet } = result;
           setUsername(fetchedUsername);
           setNama(fetchedNama);
+          setIdOutlet(fetchedIdOutlet);
+  
+          const outletResponse = await fetch(`${endpoints.outlets}/${fetchedIdOutlet}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const outletResult = await outletResponse.json();
+          if (outletResponse.ok) {
+            setOutletName(outletResult.data.nama);
+          } else {
+            console.error('Failed to fetch outlet name:', outletResult.message);
+          }
         } else {
           console.error('Failed to fetch profile:', result.message);
         }
@@ -54,9 +71,10 @@ export function MeShowEdit() {
         console.error('Error fetching profile:', err);
       }
     };
-
+  
     fetchProfile();
   }, [id, navigate]);
+  
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -146,6 +164,20 @@ export function MeShowEdit() {
             required
             inputProps={{ maxLength: 255 }}
             helperText="Name must be max 255 characters."
+          />
+          <TextField
+            fullWidth
+            label="Outlet ID"
+            value={idOutlet}
+            disabled
+            sx={{ mb: 3 }}
+          />
+          <TextField
+            fullWidth
+            label="Outlet Name"
+            value={outletName}
+            disabled
+            sx={{ mb: 3 }}
           />
 
           <Button type="submit" variant="contained" color="primary" disabled={isLoading} fullWidth>
