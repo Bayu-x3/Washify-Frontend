@@ -1,4 +1,3 @@
-// Import necessary components and hooks
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -32,10 +31,17 @@ interface Me {
   updated_at: string;
 }
 
+interface Paket {
+  id: number;
+  nama_paket: string;
+  harga: number;
+}
+
 export function TrxCreate() {
   const navigate = useNavigate();
   const [me, setMe] = useState<Me | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
+  const [pakets, setPakets] = useState<Paket[]>([]); // State untuk menyimpan data paket
   const [formValues, setFormValues] = useState<{
     id_member: string | number;
     tgl: string;
@@ -76,13 +82,15 @@ export function TrxCreate() {
       try {
         const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-        const [memberResponse, meResponse] = await Promise.all([
+        const [memberResponse, meResponse, paketResponse] = await Promise.all([
           fetch(endpoints.members, { headers }),
           fetch(endpoints.me, { headers }),
+          fetch(endpoints.pakets, { headers }), // Fetch data paket
         ]);
 
         const memberData = await memberResponse.json();
         const meData = await meResponse.json();
+        const paketData = await paketResponse.json();
 
         if (memberResponse.ok && memberData.success) setMembers(memberData.data);
         else console.error('Failed to fetch members.');
@@ -92,6 +100,12 @@ export function TrxCreate() {
         } else {
           console.error('Failed to fetch user information.');
           setMe(null);
+        }
+
+        if (paketResponse.ok && paketData.success) {
+          setPakets(paketData.data); // Set data paket ke state
+        } else {
+          console.error('Failed to fetch pakets.');
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -165,6 +179,25 @@ export function TrxCreate() {
     }
   };
 
+  const calculateTotal = () => {
+    let total = 0;
+
+    details.forEach((detail) => {
+      const paket = pakets.find((p) => p.id === Number(detail.id_paket));
+      if (paket) {
+        total += paket.harga * Number(detail.qty);
+      }
+    });
+
+    total += Number(formValues.biaya_tambahan) || 0;
+
+    total -= Number(formValues.diskon) || 0;
+
+    total += Number(formValues.pajak) || 0;
+
+    return total;
+  };
+
   return (
     <DashboardContent>
       <Box display="flex" flexDirection="column" mb={5}>
@@ -214,12 +247,18 @@ export function TrxCreate() {
 
             {details.map((detail, index) => (
               <Box key={index} display="flex" gap={2} alignItems="center" mb={2}>
-                <TextField
+                <Autocomplete
                   fullWidth
-                  label="ID Paket"
-                  name="id_paket"
-                  value={detail.id_paket}
-                  onChange={(e) => handleDetailsChange(index, 'id_paket', e.target.value)}
+                  options={pakets}
+                  getOptionLabel={(option) => `${option.nama_paket} (Rp ${option.harga})`}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Pilih Paket" margin="normal" />
+                  )}
+                  value={pakets.find((paket) => paket.id === Number(detail.id_paket)) || null}
+                  onChange={(event, newValue) => {
+                    handleDetailsChange(index, 'id_paket', newValue ? newValue.id.toString() : '');
+                  }}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
                 />
                 <TextField
                   fullWidth
@@ -296,6 +335,12 @@ export function TrxCreate() {
                 </MenuItem>
               ))}
             </TextField>
+
+            <Box mt={2}>
+              <Typography variant="h6" gutterBottom>
+                Total Harga: Rp {calculateTotal().toLocaleString()}
+              </Typography>
+            </Box>
 
             <Box mt={2}>
               <Button

@@ -16,7 +16,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import endpoints from 'src/contants/apiEndpoint';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-
 interface Member {
   id: number;
   nama: string;
@@ -26,11 +25,18 @@ interface Me {
   id: number;
 }
 
+interface Paket {
+  id: number;
+  nama_paket: string;
+  harga: number;
+}
+
 export function TrxEdit() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [me, setMe] = useState<Me | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
+  const [pakets, setPakets] = useState<Paket[]>([]);
   const [formValues, setFormValues] = useState<{
     kode_invoice: string;
     id_outlet: string;
@@ -70,21 +76,23 @@ export function TrxEdit() {
       navigate('/');
       return;
     }
-  
+
     const fetchData = async () => {
       try {
         const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-    
-        const [memberResponse, meResponse, transactionResponse] = await Promise.all([
+
+        const [memberResponse, meResponse, transactionResponse, paketResponse] = await Promise.all([
           fetch(endpoints.members, { headers }),
           fetch(endpoints.me, { headers }),
           fetch(`${endpoints.trx}/${id}`, { headers }),
+          fetch(endpoints.pakets, { headers }), // Fetch data paket
         ]);
-    
+
         const memberData = await memberResponse.json();
         const meData = await meResponse.json();
         const transactionData = await transactionResponse.json();
-    
+        const paketData = await paketResponse.json();
+
         if (memberResponse.ok && memberData.success) setMembers(memberData.data);
         if (meResponse.ok && meData.success) setMe(meData.data);
         if (transactionResponse.ok && transactionData.success) {
@@ -94,15 +102,21 @@ export function TrxEdit() {
             batas_waktu: transactionData.data.batas_waktu.split(' ')[0],
             tgl_bayar: transactionData.data.tgl_bayar ? transactionData.data.tgl_bayar.split(' ')[0] : '',
           };
-    
+
           setFormValues(formattedData);
           setDetails(transactionData.data.details || [{ id_paket: '', qty: '', keterangan: '' }]);
+        }
+
+        if (paketResponse.ok && paketData.success) {
+          setPakets(paketData.data); // Set data paket ke state
+        } else {
+          console.error('Failed to fetch pakets.');
         }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-  
+
     fetchData();
   }, [navigate, id]);
 
@@ -125,22 +139,45 @@ export function TrxEdit() {
     setDetails((prevDetails) => prevDetails.filter((_, i) => i !== index));
   };
 
+  const calculateTotal = () => {
+    let total = 0;
+
+    // Hitung total harga dari detail transaksi
+    details.forEach((detail) => {
+      const paket = pakets.find((p) => p.id === Number(detail.id_paket));
+      if (paket) {
+        total += paket.harga * Number(detail.qty);
+      }
+    });
+
+    // Tambahkan biaya tambahan
+    total += Number(formValues.biaya_tambahan) || 0;
+
+    // Kurangi diskon
+    total -= Number(formValues.diskon) || 0;
+
+    // Tambahkan pajak
+    total += Number(formValues.pajak) || 0;
+
+    return total;
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
-  
+
     const token = localStorage.getItem('access_token');
     if (!token) {
       navigate('/');
       return;
     }
-  
+
     if (!me) {
       setToast({ open: true, message: 'Failed to get user information.', severity: 'error' });
       setIsLoading(false);
       return;
     }
-  
+
     try {
       const response = await fetch(`${endpoints.trx}/${id}`, {
         method: 'PUT',
@@ -154,7 +191,7 @@ export function TrxEdit() {
           details,
         }),
       });
-  
+
       const result = await response.json();
       setToast({
         open: true,
@@ -170,6 +207,7 @@ export function TrxEdit() {
       setIsLoading(false);
     }
   };
+
   return (
     <DashboardContent>
       <Box display="flex" flexDirection="column" mb={5}>
@@ -228,12 +266,20 @@ export function TrxEdit() {
 
             {details.map((detail, index) => (
               <Box key={index} display="flex" gap={2} alignItems="center" mb={2}>
-                <TextField
+                <Autocomplete
                   fullWidth
-                  label="ID Paket"
-                  name="id_paket"
-                  value={detail.id_paket}
-                  onChange={(e) => handleDetailsChange(index, 'id_paket', e.target.value)}
+                  options={pakets}
+                  getOptionLabel={(option) =>
+                    `${option.nama_paket} (Rp ${option.harga})`
+                  }
+                  renderInput={(params) => (
+                    <TextField {...params} label="Pilih Paket" margin="normal" />
+                  )}
+                  value={pakets.find((paket) => paket.id === Number(detail.id_paket)) || null}
+                  onChange={(event, newValue) => {
+                    handleDetailsChange(index, 'id_paket', newValue ? newValue.id.toString() : '');
+                  }}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
                 />
                 <TextField
                   fullWidth
@@ -310,6 +356,13 @@ export function TrxEdit() {
                 </MenuItem>
               ))}
             </TextField>
+
+            {/* Tampilkan Total Harga */}
+            <Box mt={2}>
+              <Typography variant="h6" gutterBottom>
+                Total Harga: Rp {calculateTotal().toLocaleString()}
+              </Typography>
+            </Box>
 
             <Box mt={2}>
               <Button
