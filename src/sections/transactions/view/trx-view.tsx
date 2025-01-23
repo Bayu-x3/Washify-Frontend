@@ -180,6 +180,7 @@ export function TrxView() {
                     { id: 'kode_invoice', label: 'Invoice Code' },
                     { id: 'biaya_tambahan', label: 'Additional Price' },
                     { id: 'status', label: 'Status' },
+                    { id:'dibayar', label: 'Status Paid'},
                     { id: '' },
                   ]}
                 />

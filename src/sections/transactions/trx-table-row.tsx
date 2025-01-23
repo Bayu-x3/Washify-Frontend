@@ -27,6 +27,7 @@ export type TrxProps = {
   kode_invoice: string;
   biaya_tambahan: string;
   status: string;
+  dibayar: string;
 };
 
 type TrxTableRowProps = {
@@ -125,6 +126,8 @@ export function TrxTableRow({ row, selected, onSelectRow, onDeleteUser }: TrxTab
         <TableCell>{row.biaya_tambahan}</TableCell>
 
         <TableCell>{row.status}</TableCell>
+
+        <TableCell>{row.dibayar}</TableCell>
 
         <TableCell align="right">
           <IconButton onClick={handleOpenPopover}>
