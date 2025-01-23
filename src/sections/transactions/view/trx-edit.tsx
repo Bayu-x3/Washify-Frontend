@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -11,6 +11,7 @@ import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Autocomplete from '@mui/material/Autocomplete';
 
 import endpoints from 'src/contants/apiEndpoint';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -37,7 +38,19 @@ export function TrxEdit() {
   const [me, setMe] = useState<Me | null>(null);
   const [outlets, setOutlets] = useState<Outlet[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [formValues, setFormValues] = useState({
+  const [formValues, setFormValues] = useState<{
+    kode_invoice: string;
+    id_outlet: string;
+    id_member: string | number;
+    tgl: string;
+    batas_waktu: string;
+    tgl_bayar: string;
+    biaya_tambahan: string;
+    diskon: string;
+    pajak: string;
+    status: string;
+    dibayar: string;
+  }>({
     kode_invoice: '',
     id_outlet: '',
     id_member: '',
@@ -51,12 +64,12 @@ export function TrxEdit() {
     dibayar: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [details, setDetails] = useState([{ id_paket: '', qty: '', keterangan: '' }]);
   const [toast, setToast] = useState({
     open: false,
     message: '',
     severity: 'success' as 'success' | 'error',
   });
-
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -69,12 +82,14 @@ export function TrxEdit() {
       try {
         const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-        const [outletResponse, memberResponse, meResponse, transactionResponse] = await Promise.all([
-          fetch(endpoints.outlets, { headers }),
-          fetch(endpoints.members, { headers }),
-          fetch(endpoints.me, { headers }),
-          fetch(`${endpoints.trx}/${id}`, { headers }),
-        ]);
+        const [outletResponse, memberResponse, meResponse, transactionResponse] = await Promise.all(
+          [
+            fetch(endpoints.outlets, { headers }),
+            fetch(endpoints.members, { headers }),
+            fetch(endpoints.me, { headers }),
+            fetch(`${endpoints.trx}/${id}`, { headers }),
+          ]
+        );
 
         const outletData = await outletResponse.json();
         const memberData = await memberResponse.json();
@@ -89,6 +104,7 @@ export function TrxEdit() {
             ...transactionData.data,
             tgl_bayar: transactionData.data.tgl_bayar ?? '',
           });
+          setDetails(transactionData.data.details || [{ id_paket: '', qty: '', keterangan: '' }]);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -101,6 +117,20 @@ export function TrxEdit() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDetailsChange = (index: number, field: string, value: string) => {
+    setDetails((prevDetails) =>
+      prevDetails.map((detail, i) => (i === index ? { ...detail, [field]: value } : detail))
+    );
+  };
+
+  const addDetail = () => {
+    setDetails((prevDetails) => [...prevDetails, { id_paket: '', qty: '', keterangan: '' }]);
+  };
+
+  const removeDetail = (index: number) => {
+    setDetails((prevDetails) => prevDetails.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -129,13 +159,16 @@ export function TrxEdit() {
           diskon: parseFloat(formValues.diskon),
           pajak: parseFloat(formValues.pajak),
           id_user: me.id,
+          details,
         }),
       });
 
       const result = await response.json();
       setToast({
         open: true,
-        message: response.ok ? 'Transaction updated successfully!' : result.message || 'Failed to update transaction.',
+        message: response.ok
+          ? 'Transaction updated successfully!'
+          : result.message || 'Failed to update transaction.',
         severity: response.ok ? 'success' : 'error',
       });
     } catch (error) {
@@ -174,7 +207,7 @@ export function TrxEdit() {
               onChange={handleChange}
               sx={{ mb: 3 }}
               required
-             />
+            />
 
             <TextField
               fullWidth
@@ -192,37 +225,74 @@ export function TrxEdit() {
               ))}
             </TextField>
 
-            <TextField
+            <Autocomplete
               fullWidth
-              select
-              label="Member"
-              name="id_member"
-              value={formValues.id_member}
-              onChange={handleChange}
-              margin="normal"
-            >
-              {members.map((member) => (
-                <MenuItem key={member.id} value={member.id}>
-                  {member.nama}
-                </MenuItem>
-              ))}
-            </TextField>
+              options={members}
+              getOptionLabel={(option) => option.nama}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Member"
+                  margin="normal"
+                  name="id_member"
+                  onChange={handleChange}
+                />
+              )}
+              renderOption={(props, option) => (
+                <li {...props} style={{ color: 'red' }}>
+                  {option.nama}
+                </li>
+              )}
+              onChange={(event, newValue) => {
+                setFormValues((prev) => ({
+                  ...prev,
+                  id_member: newValue ? newValue.id : '',
+                }));
+              }}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+            />
+
+            {details.map((detail, index) => (
+              <Box key={index} display="flex" gap={2} alignItems="center" mb={2}>
+                <TextField
+                  fullWidth
+                  label="ID Paket"
+                  name="id_paket"
+                  value={detail.id_paket}
+                  onChange={(e) => handleDetailsChange(index, 'id_paket', e.target.value)}
+                />
+                <TextField
+                  fullWidth
+                  label="Quantity"
+                  name="qty"
+                  value={detail.qty}
+                  onChange={(e) => handleDetailsChange(index, 'qty', e.target.value)}
+                  type="number"
+                />
+                <TextField
+                  fullWidth
+                  label="Keterangan"
+                  name="keterangan"
+                  value={detail.keterangan}
+                  onChange={(e) => handleDetailsChange(index, 'keterangan', e.target.value)}
+                />
+                <Button onClick={() => removeDetail(index)}>Remove</Button>
+              </Box>
+            ))}
+            <Button onClick={addDetail}>Add Detail</Button>
 
             {['tgl', 'batas_waktu', 'tgl_bayar'].map((field) => (
               <TextField
-              fullWidth
-              type="date"
-              name={field}
-              value={formValues[field as keyof typeof formValues]
-                ? formValues[field as keyof typeof formValues].slice(0, 10)
-                : ''
-              }
-              onChange={handleChange}
-              margin="normal"
-              label={field.replace('_', ' ').toUpperCase()}
-              InputLabelProps={{ shrink: true }}
-            />
-          ))}
+                fullWidth
+                type="date"
+                name={field}
+                value={formValues[field as keyof typeof formValues]}
+                onChange={handleChange}
+                margin="normal"
+                label={field.replace('_', ' ').toUpperCase()}
+                InputLabelProps={{ shrink: true }}
+              />
+            ))}
 
             {['biaya_tambahan', 'diskon', 'pajak'].map((field) => (
               <TextField
@@ -268,7 +338,13 @@ export function TrxEdit() {
             </TextField>
 
             <Box mt={2}>
-              <Button type="submit" variant="contained" color="primary" disabled={isLoading} fullWidth>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={isLoading}
+                fullWidth
+              >
                 {isLoading ? 'Updating...' : 'Update Transaction'}
               </Button>
             </Box>
@@ -277,8 +353,15 @@ export function TrxEdit() {
       </Box>
 
       {/* Snackbar for notifications */}
-      <Snackbar open={toast.open} autoHideDuration={6000} onClose={() => setToast((prev) => ({ ...prev, open: false }))}>
-        <Alert severity={toast.severity} onClose={() => setToast((prev) => ({ ...prev, open: false }))}>
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={6000}
+        onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+      >
+        <Alert
+          severity={toast.severity}
+          onClose={() => setToast((prev) => ({ ...prev, open: false }))}
+        >
           {toast.message}
         </Alert>
       </Snackbar>

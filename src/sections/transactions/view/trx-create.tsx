@@ -17,13 +17,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import endpoints from 'src/contants/apiEndpoint';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-interface Outlet {
-  id: number;
-  nama: string;
-  alamat?: string;
-  tlp?: string;
-}
-
 interface Member {
   id: number;
   nama: string;
@@ -39,14 +32,11 @@ interface Me {
   updated_at: string;
 }
 
-
 export function TrxCreate() {
   const navigate = useNavigate();
   const [me, setMe] = useState<Me | null>(null);
-  const [outlets, setOutlets] = useState<Outlet[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [formValues, setFormValues] = useState<{
-    id_outlet: string | number;
     id_member: string | number;
     tgl: string;
     batas_waktu: string;
@@ -57,7 +47,6 @@ export function TrxCreate() {
     status: string;
     dibayar: string;
   }>({
-    id_outlet: '',
     id_member: '',
     tgl: '',
     batas_waktu: '',
@@ -69,6 +58,7 @@ export function TrxCreate() {
     dibayar: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [details, setDetails] = useState([{ id_paket: '', qty: '', keterangan: '' }]);
   const [toast, setToast] = useState({
     open: false,
     message: '',
@@ -85,35 +75,29 @@ export function TrxCreate() {
     const fetchData = async () => {
       try {
         const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-    
-        const [outletResponse, memberResponse, meResponse] = await Promise.all([
-          fetch(endpoints.outlets, { headers }),
+
+        const [memberResponse, meResponse] = await Promise.all([
           fetch(endpoints.members, { headers }),
           fetch(endpoints.me, { headers }),
         ]);
-    
-        const outletData = await outletResponse.json();
+
         const memberData = await memberResponse.json();
         const meData = await meResponse.json();
-    
-        if (outletResponse.ok && outletData.success) setOutlets(outletData.data);
-        else console.error('Failed to fetch outlets.');
-    
+
         if (memberResponse.ok && memberData.success) setMembers(memberData.data);
         else console.error('Failed to fetch members.');
-    
+
         if (meResponse.ok) {
           setMe(meData);
         } else {
           console.error('Failed to fetch user information.');
           setMe(null);
         }
-        
       } catch (error) {
         console.error('Error fetching data:', error);
         setMe(null);
       }
-    };    
+    };
 
     fetchData();
   }, [navigate]);
@@ -127,6 +111,20 @@ export function TrxCreate() {
     }));
   };
 
+  const handleDetailsChange = (index: number, field: string, value: string) => {
+    setDetails((prevDetails) =>
+      prevDetails.map((detail, i) => (i === index ? { ...detail, [field]: value } : detail))
+    );
+  };
+
+  const addDetail = () => {
+    setDetails((prevDetails) => [...prevDetails, { id_paket: '', qty: '', keterangan: '' }]);
+  };
+
+  const removeDetail = (index: number) => {
+    setDetails((prevDetails) => prevDetails.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
@@ -134,12 +132,6 @@ export function TrxCreate() {
     const token = localStorage.getItem('access_token');
     if (!token) {
       navigate('/');
-      return;
-    }
-
-    if (!me) {
-      setToast({ open: true, message: 'Failed to get user information.', severity: 'error' });
-      setIsLoading(false);
       return;
     }
 
@@ -152,7 +144,8 @@ export function TrxCreate() {
           biaya_tambahan: parseFloat(formValues.biaya_tambahan),
           diskon: parseFloat(formValues.diskon),
           pajak: parseFloat(formValues.pajak),
-          id_user: me.id,
+          id_user: me?.id,
+          details,
         }),
       });
 
@@ -194,33 +187,6 @@ export function TrxCreate() {
 
             <Autocomplete
               fullWidth
-              options={outlets}
-              getOptionLabel={(option) => option.nama}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Outlet"
-                  margin="normal"
-                  name="id_outlet"
-                  onChange={handleChange}
-                />
-              )}
-              renderOption={(props, option) => (
-                <li {...props} style={{ color: 'red' }}>
-                  {option.nama}
-                </li>
-              )}
-              onChange={(event, newValue) => {
-                setFormValues((prev) => ({
-                  ...prev,
-                  id_outlet: newValue ? newValue.id : '',
-                }));
-              }}
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-            />
-
-            <Autocomplete
-              fullWidth
               options={members}
               getOptionLabel={(option) => option.nama}
               renderInput={(params) => (
@@ -245,6 +211,35 @@ export function TrxCreate() {
               }}
               isOptionEqualToValue={(option, value) => option.id === value.id}
             />
+
+            {details.map((detail, index) => (
+              <Box key={index} display="flex" gap={2} alignItems="center" mb={2}>
+                <TextField
+                  fullWidth
+                  label="ID Paket"
+                  name="id_paket"
+                  value={detail.id_paket}
+                  onChange={(e) => handleDetailsChange(index, 'id_paket', e.target.value)}
+                />
+                <TextField
+                  fullWidth
+                  label="Quantity"
+                  name="qty"
+                  value={detail.qty}
+                  onChange={(e) => handleDetailsChange(index, 'qty', e.target.value)}
+                  type="number"
+                />
+                <TextField
+                  fullWidth
+                  label="Keterangan"
+                  name="keterangan"
+                  value={detail.keterangan}
+                  onChange={(e) => handleDetailsChange(index, 'keterangan', e.target.value)}
+                />
+                <Button onClick={() => removeDetail(index)}>Remove</Button>
+              </Box>
+            ))}
+            <Button onClick={addDetail}>Add Detail</Button>
 
             {['tgl', 'batas_waktu', 'tgl_bayar'].map((field) => (
               <TextField
