@@ -34,7 +34,7 @@ export function MeShowEdit() {
       navigate('/');
       return;
     }
-  
+
     const fetchProfile = async () => {
       try {
         const response = await fetch(`${endpoints.me}`, {
@@ -44,13 +44,26 @@ export function MeShowEdit() {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile');
+        }
+
         const result = await response.json();
-        if (response.ok) {
-          const { username: fetchedUsername, nama: fetchedNama, id_outlet: fetchedIdOutlet } = result;
-          setUsername(fetchedUsername);
-          setNama(fetchedNama);
-          setIdOutlet(fetchedIdOutlet);
-  
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to fetch profile');
+        }
+
+        const {
+          username: fetchedUsername,
+          nama: fetchedNama,
+          id_outlet: fetchedIdOutlet,
+        } = result.data;
+        setUsername(fetchedUsername);
+        setNama(fetchedNama);
+        setIdOutlet(fetchedIdOutlet);
+
+        if (fetchedIdOutlet) {
           const outletResponse = await fetch(`${endpoints.outlets}/${fetchedIdOutlet}`, {
             method: 'GET',
             headers: {
@@ -58,23 +71,27 @@ export function MeShowEdit() {
               Authorization: `Bearer ${token}`,
             },
           });
+
+          if (!outletResponse.ok) {
+            throw new Error('Failed to fetch outlet');
+          }
+
           const outletResult = await outletResponse.json();
-          if (outletResponse.ok) {
+          if (outletResult.success) {
             setOutletName(outletResult.data.nama);
           } else {
-            console.error('Failed to fetch outlet name:', outletResult.message);
+            throw new Error(outletResult.message || 'Failed to fetch outlet');
           }
         } else {
-          console.error('Failed to fetch profile:', result.message);
+          setOutletName('No outlet assigned');
         }
       } catch (err) {
         console.error('Error fetching profile:', err);
+        setError(err.message);
       }
     };
-  
     fetchProfile();
   }, [id, navigate]);
-  
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -165,20 +182,8 @@ export function MeShowEdit() {
             inputProps={{ maxLength: 255 }}
             helperText="Name must be max 255 characters."
           />
-          <TextField
-            fullWidth
-            label="Outlet ID"
-            value={idOutlet}
-            disabled
-            sx={{ mb: 3 }}
-          />
-          <TextField
-            fullWidth
-            label="Outlet Name"
-            value={outletName}
-            disabled
-            sx={{ mb: 3 }}
-          />
+          <TextField fullWidth label="Outlet ID" value={idOutlet} disabled sx={{ mb: 3 }} />
+          <TextField fullWidth label="Outlet Name" value={outletName} disabled sx={{ mb: 3 }} />
 
           <Button type="submit" variant="contained" color="primary" disabled={isLoading} fullWidth>
             {isLoading ? 'Updating...' : 'Update Profile'}

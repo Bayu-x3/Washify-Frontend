@@ -16,12 +16,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import endpoints from 'src/contants/apiEndpoint';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-interface Outlet {
-  id: number;
-  nama: string;
-  alamat?: string;
-  tlp?: string;
-}
 
 interface Member {
   id: number;
@@ -36,7 +30,6 @@ export function TrxEdit() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [me, setMe] = useState<Me | null>(null);
-  const [outlets, setOutlets] = useState<Outlet[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [formValues, setFormValues] = useState<{
     kode_invoice: string;
@@ -77,40 +70,39 @@ export function TrxEdit() {
       navigate('/');
       return;
     }
-
+  
     const fetchData = async () => {
       try {
         const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-
-        const [outletResponse, memberResponse, meResponse, transactionResponse] = await Promise.all(
-          [
-            fetch(endpoints.outlets, { headers }),
-            fetch(endpoints.members, { headers }),
-            fetch(endpoints.me, { headers }),
-            fetch(`${endpoints.trx}/${id}`, { headers }),
-          ]
-        );
-
-        const outletData = await outletResponse.json();
+    
+        const [memberResponse, meResponse, transactionResponse] = await Promise.all([
+          fetch(endpoints.members, { headers }),
+          fetch(endpoints.me, { headers }),
+          fetch(`${endpoints.trx}/${id}`, { headers }),
+        ]);
+    
         const memberData = await memberResponse.json();
         const meData = await meResponse.json();
         const transactionData = await transactionResponse.json();
-
-        if (outletResponse.ok && outletData.success) setOutlets(outletData.data);
+    
         if (memberResponse.ok && memberData.success) setMembers(memberData.data);
         if (meResponse.ok && meData.success) setMe(meData.data);
         if (transactionResponse.ok && transactionData.success) {
-          setFormValues({
+          const formattedData = {
             ...transactionData.data,
-            tgl_bayar: transactionData.data.tgl_bayar ?? '',
-          });
+            tgl: transactionData.data.tgl.split(' ')[0],
+            batas_waktu: transactionData.data.batas_waktu.split(' ')[0],
+            tgl_bayar: transactionData.data.tgl_bayar ? transactionData.data.tgl_bayar.split(' ')[0] : '',
+          };
+    
+          setFormValues(formattedData);
           setDetails(transactionData.data.details || [{ id_paket: '', qty: '', keterangan: '' }]);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-
+  
     fetchData();
   }, [navigate, id]);
 
@@ -136,19 +128,19 @@ export function TrxEdit() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
-
+  
     const token = localStorage.getItem('access_token');
     if (!token) {
       navigate('/');
       return;
     }
-
+  
     if (!me) {
       setToast({ open: true, message: 'Failed to get user information.', severity: 'error' });
       setIsLoading(false);
       return;
     }
-
+  
     try {
       const response = await fetch(`${endpoints.trx}/${id}`, {
         method: 'PUT',
@@ -162,7 +154,7 @@ export function TrxEdit() {
           details,
         }),
       });
-
+  
       const result = await response.json();
       setToast({
         open: true,
@@ -178,7 +170,6 @@ export function TrxEdit() {
       setIsLoading(false);
     }
   };
-
   return (
     <DashboardContent>
       <Box display="flex" flexDirection="column" mb={5}>
@@ -205,26 +196,9 @@ export function TrxEdit() {
               name="kode_invoice"
               value={formValues.kode_invoice}
               onChange={handleChange}
-              sx={{ mb: 3 }}
+              margin="normal"
               required
             />
-
-            <TextField
-              fullWidth
-              select
-              label="Outlet"
-              name="id_outlet"
-              value={formValues.id_outlet}
-              onChange={handleChange}
-              margin="normal"
-            >
-              {outlets.map((outlet) => (
-                <MenuItem key={outlet.id} value={outlet.id}>
-                  {outlet.nama}
-                </MenuItem>
-              ))}
-            </TextField>
-
             <Autocomplete
               fullWidth
               options={members}
