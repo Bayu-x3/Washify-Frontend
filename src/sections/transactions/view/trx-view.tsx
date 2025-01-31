@@ -37,6 +37,7 @@ export function TrxView() {
   const [filterName, setFilterName] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filterStatusDibayar, setFilterStatusDibayar] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -88,12 +89,12 @@ export function TrxView() {
             transaction.status === 'baru'
               ? 'Baru'
               : transaction.status === 'proses'
-              ? 'Proses'
-              : transaction.status === 'selesai'
-              ? 'Selesai'
-              : transaction.status === 'diambil'
-              ? 'Diambil'
-              : '',
+                ? 'Proses'
+                : transaction.status === 'selesai'
+                  ? 'Selesai'
+                  : transaction.status === 'diambil'
+                    ? 'Diambil'
+                    : '',
         }));
 
         setTransactions(mappedTransactions);
@@ -111,8 +112,15 @@ export function TrxView() {
     setTransactions((prev) => prev.filter((transaction) => transaction.id !== id));
   };
 
+  const handleFilterStatusDibayar = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilterStatusDibayar(event.target.value);
+    table.onResetPage();
+  };
+
   const dataFiltered: TrxProps[] = applyFilter({
-    inputData: transactions,
+    inputData: transactions.filter((transaction) =>
+      filterStatusDibayar ? transaction.dibayar === filterStatusDibayar : true
+    ),
     comparator: getComparator(table.order, table.orderBy),
     filterName,
   });
@@ -142,6 +150,17 @@ export function TrxView() {
         >
           New Transaction
         </Button>
+      </Box>
+
+      <Box display="flex" alignItems="center" mb={3}>
+        <Typography variant="subtitle1" sx={{ mr: 2 }}>
+          Filter Status Pembayaran:
+        </Typography>
+        <select value={filterStatusDibayar} onChange={handleFilterStatusDibayar}>
+          <option value="">Semua</option>
+          <option value="dibayar">Dibayar</option>
+          <option value="belum_dibayar">Belum Dibayar</option>
+        </select>
       </Box>
 
       <Card>
@@ -180,7 +199,7 @@ export function TrxView() {
                     { id: 'kode_invoice', label: 'Invoice Code' },
                     { id: 'biaya_tambahan', label: 'Additional Price' },
                     { id: 'status', label: 'Status' },
-                    { id:'dibayar', label: 'Status Paid'},
+                    { id: 'dibayar', label: 'Status Paid' },
                     { id: '' },
                   ]}
                 />
@@ -248,14 +267,13 @@ export function useTable() {
     setSelected(checked ? newSelecteds : []);
   }, []);
 
-  const onSelectRow = useCallback(
-    (inputValue: string) => {
-      setSelected((prev) =>
-        prev.includes(inputValue) ? prev.filter((value) => value !== inputValue) : [...prev, inputValue]
-      );
-    },
-    []
-  );
+  const onSelectRow = useCallback((inputValue: string) => {
+    setSelected((prev) =>
+      prev.includes(inputValue)
+        ? prev.filter((value) => value !== inputValue)
+        : [...prev, inputValue]
+    );
+  }, []);
 
   const onResetPage = useCallback(() => {
     setPage(0);

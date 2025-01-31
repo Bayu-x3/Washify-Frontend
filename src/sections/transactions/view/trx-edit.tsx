@@ -93,6 +93,8 @@ export function TrxEdit() {
         const transactionData = await transactionResponse.json();
         const paketData = await paketResponse.json();
 
+        console.log('Member Data:', memberData); // Periksa respons dari API members
+
         if (memberResponse.ok && memberData.success) setMembers(memberData.data);
         if (meResponse.ok && meData.success) setMe(meData.data);
         if (transactionResponse.ok && transactionData.success) {
@@ -100,7 +102,9 @@ export function TrxEdit() {
             ...transactionData.data,
             tgl: transactionData.data.tgl.split(' ')[0],
             batas_waktu: transactionData.data.batas_waktu.split(' ')[0],
-            tgl_bayar: transactionData.data.tgl_bayar ? transactionData.data.tgl_bayar.split(' ')[0] : '',
+            tgl_bayar: transactionData.data.tgl_bayar
+              ? transactionData.data.tgl_bayar.split(' ')[0]
+              : '',
           };
 
           setFormValues(formattedData);
@@ -138,6 +142,8 @@ export function TrxEdit() {
   const removeDetail = (index: number) => {
     setDetails((prevDetails) => prevDetails.filter((_, i) => i !== index));
   };
+
+  const selectedMember = members.find((member) => member.id === Number(formValues.id_member));
 
   const calculateTotal = () => {
     let total = 0;
@@ -206,6 +212,8 @@ export function TrxEdit() {
     } finally {
       setIsLoading(false);
     }
+
+    
   };
 
   return (
@@ -238,40 +246,39 @@ export function TrxEdit() {
               required
             />
             <Autocomplete
-              fullWidth
-              options={members}
-              getOptionLabel={(option) => option.nama}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Member"
-                  margin="normal"
-                  name="id_member"
-                  onChange={handleChange}
-                />
-              )}
-              renderOption={(props, option) => (
-                <li {...props} style={{ color: 'red' }}>
-                  {option.nama}
-                </li>
-              )}
-              onChange={(event, newValue) => {
-                setFormValues((prev) => ({
-                  ...prev,
-                  id_member: newValue ? newValue.id : '',
-                }));
-              }}
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-            />
+  fullWidth
+  options={members}
+  getOptionLabel={(option) => option.nama}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Member"
+      margin="normal"
+      name="id_member"
+      onChange={handleChange}
+    />
+  )}
+  renderOption={(props, option) => (
+    <li {...props} style={{ color: 'red' }}>
+      {option.nama}
+    </li>
+  )}
+  onChange={(event, newValue) => {
+    setFormValues((prev) => ({
+      ...prev,
+      id_member: newValue ? newValue.id : '',
+    }));
+  }}
+  value={selectedMember || null} // Set value ke selectedMember
+  isOptionEqualToValue={(option, value) => option.id === value.id}
+/>
 
             {details.map((detail, index) => (
               <Box key={index} display="flex" gap={2} alignItems="center" mb={2}>
                 <Autocomplete
                   fullWidth
                   options={pakets}
-                  getOptionLabel={(option) =>
-                    `${option.nama_paket} (Rp ${option.harga})`
-                  }
+                  getOptionLabel={(option) => `${option.nama_paket} (Rp ${option.harga})`}
                   renderInput={(params) => (
                     <TextField {...params} label="Pilih Paket" margin="normal" />
                   )}
