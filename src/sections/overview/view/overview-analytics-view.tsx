@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { Button } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
+// import CloudDownloadIcon from '@mui/icons-material/CloudDownload'; // Import icon download
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -86,18 +88,60 @@ export function OverviewAnalyticsView() {
 
   const { ringkasan_statistik, paket_paling_banyak, top_member, notifikasi, user } = dashboardData;
 
+  const handleDownloadPDF = async() => {
+    const token = localStorage.getItem('access_token');
+    if(!token) {
+      console.error('No token found')
+      return;
+    }
+
+    try {
+      const response = await fetch(apiEndpoint.dashboardReports, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if(!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Data_Report.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch ( error) {
+        console.error('Error', error);
+    }
+  }
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
         Hi, Welcome back {user?.name} 👋
       </Typography>
 
+      <Button
+      variant="contained"
+      color="primary"
+      onClick={handleDownloadPDF}
+      sx={{ mb: 3 }}
+    >
+      Download Report PDF
+    </Button>
+
       <Grid container spacing={3}>
         {/* Total Outlets */}
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="Total Outlets"
-            total={ringkasan_statistik.jumlah_outlet}
+            title="Pending Trx"
+            total={notifikasi.transaksi_belum_dibayar}
             percent={ringkasan_statistik.percent_outlet}
             icon={<img alt="icon" src="/assets/icons/glass/ic-glass-bag.svg" />}
           />
@@ -179,16 +223,6 @@ export function OverviewAnalyticsView() {
             }}
           />
         </Grid>
-
-        <Grid xs={12} md={6}>
-            <AnalyticsWidgetSummary
-              title="Pending Transactions"
-              total={notifikasi.transaksi_belum_dibayar}
-              percent={0} // Provide a default or calculated percentage
-              color="error"
-              icon={<img alt="icon" src="/assets/icons/glass/ic-glass-alert.svg" />}
-            />
-          </Grid>
       </Grid>
     </DashboardContent>
   );

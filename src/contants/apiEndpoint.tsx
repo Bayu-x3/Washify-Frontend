@@ -1,5 +1,6 @@
 const API_BASE_URL = 'http://127.0.0.1:8000/api';
 const endpoints = {
+    dashboardReports: `${API_BASE_URL}/dashboard/report`,
     me: `${API_BASE_URL}/me`,
     login: `${API_BASE_URL}/login`,
     logout: `${API_BASE_URL}/logout`,
