@@ -163,8 +163,8 @@ export function MemberEdit() {
             sx={{ mb: 3 }}
             required
           >
-            <MenuItem value="perempuan">Perempuan</MenuItem>
-            <MenuItem value="laki_laki">Laki Laki</MenuItem>
+            <MenuItem value="P">Perempuan</MenuItem>
+            <MenuItem value="L">Laki Laki</MenuItem>
           </TextField>
 
             <TextField

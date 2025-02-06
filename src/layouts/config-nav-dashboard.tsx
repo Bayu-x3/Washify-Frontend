@@ -43,9 +43,9 @@ export const navData = [
     path: '/trx',
     icon: icon('ic-money'),
   },
-  {
-    title: 'Details Transactions',
-    path: '/details',
-    icon: icon('ic-notebook'),
-  },
+  // {
+  //   title: 'Details Transactions',
+  //   path: '/details',
+  //   icon: icon('ic-notebook'),
+  // },
 ];

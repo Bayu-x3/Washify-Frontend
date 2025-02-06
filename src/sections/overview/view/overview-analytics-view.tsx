@@ -132,22 +132,10 @@ export function OverviewAnalyticsView() {
             total={ringkasan_statistik.pendapatan_hari_ini}
             percent={ringkasan_statistik.percent_today_revenue}
             color="warning"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-dollar.svg" />}
-          />
-        </Grid>
-
-        {/* Notifications */}
-        <Grid xs={12} md={6}>
-          <AnalyticsWidgetSummary
-            title="Pending Transactions"
-            total={notifikasi.transaksi_belum_dibayar}
-            percent={0} // Provide a default or calculated percentage
-            color="error"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-alert.svg" />}
+            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-message.svg" />}
           />
         </Grid>
       </Grid>
-
       <Grid container spacing={3} sx={{ mt: 4 }}>
         {/* Status Transaksi */}
         <Grid xs={12} md={6}>
@@ -164,32 +152,44 @@ export function OverviewAnalyticsView() {
             }}
           />
         </Grid>
+
+        <Grid xs={12} md={6}>
+          <AnalyticsCurrentVisits
+            title="Most Popular Package"
+            chart={{
+              series: [
+                {
+                  label: paket_paling_banyak.nama_paket || 'N/A',
+                  value: paket_paling_banyak.total_qty || 0,
+                },
+              ],
+              colors: ['#00AB55'],
+            }}
+          />
+        </Grid>
+        {/* Top Member */}
+        <Grid xs={12} md={6}>
+          <AnalyticsCurrentVisits
+            title="Top Member"
+            chart={{
+              series: [
+                { label: top_member.nama_member || 'N/A', value: top_member.total_transaksi || 0 },
+              ],
+              colors: ['#FFC107'],
+            }}
+          />
+        </Grid>
+
+        <Grid xs={12} md={6}>
+            <AnalyticsWidgetSummary
+              title="Pending Transactions"
+              total={notifikasi.transaksi_belum_dibayar}
+              percent={0} // Provide a default or calculated percentage
+              color="error"
+              icon={<img alt="icon" src="/assets/icons/glass/ic-glass-alert.svg" />}
+            />
+          </Grid>
       </Grid>
-
-      <Grid container spacing={3} sx={{ mt: 4 }}>
-  {/* Most Popular Package */}
-  <Grid xs={12} md={6}>
-    <AnalyticsCurrentVisits
-      title="Most Popular Package"
-      chart={{
-        series: [{ label: paket_paling_banyak.nama_paket || 'N/A', value: paket_paling_banyak.total_qty || 0 }],
-        colors: ['#00AB55'],
-      }}
-    />
-  </Grid>
-
-  {/* Top Member */}
-  <Grid xs={12} md={6}>
-    <AnalyticsCurrentVisits
-      title="Top Member"
-      chart={{
-        series: [{ label: top_member.nama_member || 'N/A', value: top_member.total_transaksi || 0 }],
-        colors: ['#FFC107'],
-      }}
-    />
-  </Grid>
-</Grid>
-
     </DashboardContent>
   );
 }

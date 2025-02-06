@@ -6,7 +6,9 @@ import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
 import TableBody from '@mui/material/TableBody';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import TableContainer from '@mui/material/TableContainer';
@@ -112,10 +114,13 @@ export function TrxView() {
     setTransactions((prev) => prev.filter((transaction) => transaction.id !== id));
   };
 
-  const handleFilterStatusDibayar = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilterStatusDibayar(event.target.value);
+  const handleFilterStatusDibayar = (event: React.ChangeEvent<any>) => {
+    const target = event.target as HTMLSelectElement;
+    setFilterStatusDibayar(target.value);
     table.onResetPage();
   };
+  
+  
 
   const dataFiltered: TrxProps[] = applyFilter({
     inputData: transactions.filter((transaction) =>
@@ -153,14 +158,27 @@ export function TrxView() {
       </Box>
 
       <Box display="flex" alignItems="center" mb={3}>
-        <Typography variant="subtitle1" sx={{ mr: 2 }}>
+        <Typography variant="subtitle1" sx={{ mr: 2, fontWeight: 'bold', color: 'text.primary' }}>
           Filter Status Pembayaran:
         </Typography>
-        <select value={filterStatusDibayar} onChange={handleFilterStatusDibayar}>
-          <option value="">Semua</option>
-          <option value="dibayar">Dibayar</option>
-          <option value="belum_dibayar">Belum Dibayar</option>
-        </select>
+        <TextField
+          select
+          value={filterStatusDibayar}
+          onChange={handleFilterStatusDibayar}
+          variant="outlined"
+          size="small"
+          sx={{
+            minWidth: 150, // Lebar minimal untuk dropdown
+            backgroundColor: 'background.paper', // Warna latar belakang
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2, // Border radius
+            },
+          }}
+        >
+          <MenuItem value="">Semua</MenuItem>
+          <MenuItem value="dibayar">Dibayar</MenuItem>
+          <MenuItem value="belum_dibayar">Belum Dibayar</MenuItem>
+        </TextField>
       </Box>
 
       <Card>
